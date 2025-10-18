@@ -12,6 +12,7 @@ Application de gestion de tournois corporatifs de padel.
 ## 💻 Kit de démarrage fonctionnel
 
 ### Backend (FASTAPI)
+```
 backend/
 ├── app/
 │   ├── api/
@@ -34,9 +35,10 @@ backend/
 ├── .env.example
 ├── requirements.txt
 └── README.md
-
+```
 
 ### Frontend (VueJS)
+```
 frontend/
 ├── src/
 │   ├── components/
@@ -61,6 +63,7 @@ frontend/
 ├── .env.example
 ├── package.json
 └── README.md
+```
 
 ## 🚀 Démarrage rapide
 
