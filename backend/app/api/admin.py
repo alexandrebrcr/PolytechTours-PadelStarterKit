@@ -88,6 +88,28 @@ def delete_player(
     db.commit()
     return {"message": "Joueur supprimé"}
 
+@router.put("/players/{player_id}/role")
+def change_player_role(
+    player_id: int,
+    role: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    check_admin(current_user)
+    player = db.query(Player).filter(Player.id == player_id).first()
+    if not player:
+        raise HTTPException(404, "Joueur non trouvé")
+    
+    if not player.user:
+        raise HTTPException(400, "Ce joueur n'a pas de compte utilisateur")
+        
+    if role not in ["JOUEUR", "ADMINISTRATEUR"]:
+        raise HTTPException(400, "Rôle invalide")
+        
+    player.user.role = role
+    db.commit()
+    return {"message": f"Rôle mis à jour : {role}"}
+
 # --- Teams ---
 
 @router.post("/teams", response_model=TeamResponse)

@@ -39,6 +39,7 @@ class PlayerUpdate(BaseModel):
 class PlayerResponse(PlayerBase):
     id: int
     team_id: Optional[int] = None
+    user_role: Optional[str] = None
     
     class Config:
         from_attributes = True

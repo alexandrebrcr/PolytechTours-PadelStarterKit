@@ -62,7 +62,15 @@ export const authAPI = {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   
-  deleteAvatar: () => api.delete('/auth/me/avatar')
+  deleteAvatar: () => api.delete('/auth/me/avatar'),
+
+  // API administrateur
+  createAccount: (playerId) => api.post('/admin/accounts', { player_id: playerId }),
+  
+  updatePlayerRole: (playerId, role) => api.put(`/admin/players/${playerId}/role?role=${role}`),
+
+  // Teams
+  getTeams: () => api.get('/admin/teams'),
 }
 
 export default api

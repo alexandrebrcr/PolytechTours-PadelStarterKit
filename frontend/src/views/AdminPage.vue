@@ -42,6 +42,7 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entreprise</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Licence</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Compte</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -50,10 +51,18 @@
                 <td class="px-6 py-4 whitespace-nowrap">{{ player.firstname }} {{ player.lastname }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ player.company }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ player.license_number }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span v-if="player.user_role" :class="player.user_role === 'ADMINISTRATEUR' ? 'text-red-600 font-bold' : 'text-green-600'">
+                    {{ player.user_role }}
+                  </span>
+                  <span v-else class="text-gray-400">Aucun</span>
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                   <button @click="openPlayerModal(player)" class="text-indigo-600 hover:text-indigo-900">Modifier</button>
                   <button @click="deletePlayer(player.id)" class="text-red-600 hover:text-red-900">Supprimer</button>
-                  <button @click="createAccount(player.id)" class="text-green-600 hover:text-green-900">Créer compte</button>
+                  <button v-if="!player.user_role" @click="createAccount(player.id)" class="text-green-600 hover:text-green-900">Créer compte</button>
+                  <button v-if="player.user_role === 'JOUEUR'" @click="changeRole(player.id, 'ADMINISTRATEUR')" class="text-purple-600 hover:text-purple-900">Promouvoir Admin</button>
+                  <button v-if="player.user_role === 'ADMINISTRATEUR'" @click="changeRole(player.id, 'JOUEUR')" class="text-orange-600 hover:text-orange-900">Rétrograder</button>
                 </td>
               </tr>
             </tbody>
@@ -293,6 +302,17 @@ async function createAccount(playerId) {
   try {
     const res = await api.post('/admin/accounts', { player_id: playerId })
     newAccount.value = res.data
+    loadData() // Recharger pour voir le nouveau statut
+  } catch (err) {
+    alert(err.response?.data?.detail || 'Erreur')
+  }
+}
+
+async function changeRole(playerId, newRole) {
+  if (!confirm(`Voulez-vous vraiment changer le rôle en ${newRole} ?`)) return
+  try {
+    await api.put(`/admin/players/${playerId}/role`, { role: newRole })
+    loadData()
   } catch (err) {
     alert(err.response?.data?.detail || 'Erreur')
   }

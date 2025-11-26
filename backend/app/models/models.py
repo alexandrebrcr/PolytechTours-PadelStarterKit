@@ -54,6 +54,10 @@ class Player(Base):
     team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)
     team = relationship("Team", back_populates="players")
 
+    @property
+    def user_role(self):
+        return self.user.role if self.user else None
+
 class Team(Base):
     __tablename__ = "teams"
     

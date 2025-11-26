@@ -51,3 +51,10 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+if __name__ == "__main__":
+    import sys
+    from app.database import init_db
+    
+    if len(sys.argv) > 1 and sys.argv[1] == "init_db":
+        init_db()
