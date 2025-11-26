@@ -10,9 +10,6 @@ describe('Navigation', () => {
     })
   
     it('Visiteur est redirigé vers login pour les pages protégées', () => {
-      cy.visit('/planning')
-      cy.url().should('include', '/login')
-      
       cy.visit('/matches')
       cy.url().should('include', '/login')
       

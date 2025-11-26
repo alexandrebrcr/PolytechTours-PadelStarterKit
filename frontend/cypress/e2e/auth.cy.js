@@ -31,7 +31,8 @@ describe('Authentification', () => {
   it('Connexion échoue avec email invalide', () => {
     cy.visit('/login')
     
-    cy.get('input[type="email"]').type('wrong@example.com')
+    const randomEmail = `wrong_${Date.now()}@example.com`
+    cy.get('input[type="email"]').type(randomEmail)
     cy.get('input[type="password"]').type('Admin@2025!')
     cy.get('button[type="submit"]').click()
     
@@ -54,9 +55,11 @@ describe('Authentification', () => {
   it('Bloque le compte après 5 tentatives échouées', () => {
     cy.visit('/login')
     
+    const lockedEmail = `locked_${Date.now()}@test.com`
+    
     // Faire 5 tentatives échouées
     for (let i = 0; i < 5; i++) {
-      cy.get('input[type="email"]').clear().type('admin@padel.com')
+      cy.get('input[type="email"]').clear().type(lockedEmail)
       cy.get('input[type="password"]').clear().type('WrongPassword')
       cy.get('button[type="submit"]').click()
       // Attendre que le message d'erreur apparaisse avant de continuer
