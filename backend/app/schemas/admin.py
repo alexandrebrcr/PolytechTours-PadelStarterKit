@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from typing import List, Optional
 import re
 
@@ -44,8 +44,7 @@ class PlayerResponse(PlayerBase):
     team_id: Optional[int] = None
     user_role: Optional[str] = None
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # --- Teams ---
 class TeamCreate(BaseModel):
@@ -59,8 +58,7 @@ class TeamResponse(BaseModel):
     players: List[PlayerResponse]
     pool_id: Optional[int] = None
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # --- Pools ---
 class PoolCreate(BaseModel):
@@ -79,8 +77,7 @@ class PoolResponse(BaseModel):
     name: str
     teams: List[TeamResponse]
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # --- Accounts ---
 class AccountCreate(BaseModel):

@@ -2,7 +2,7 @@
 # FICHIER : backend/app/schemas/auth.py
 # ============================================
 
-from pydantic import BaseModel, EmailStr, Field, field_validator, ValidationInfo
+from pydantic import BaseModel, EmailStr, Field, field_validator, ValidationInfo, ConfigDict
 from typing import Optional
 from datetime import date
 import re
@@ -53,8 +53,7 @@ class UserResponse(BaseModel):
     profile_picture: Optional[str] = None
     player_id: Optional[int] = None
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class TokenResponse(BaseModel):
     access_token: str

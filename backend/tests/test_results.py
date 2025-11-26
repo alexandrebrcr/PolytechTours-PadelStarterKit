@@ -1,5 +1,5 @@
 import pytest
-from datetime import date, timedelta
+from datetime import date, timedelta, time
 from app.models.models import Match, Team, Player, MatchStatus, Event
 
 @pytest.fixture
@@ -13,7 +13,7 @@ def ranking_data(db_session):
     db_session.commit()
     
     # Créer un événement
-    event = Event(date=date.today(), start_time="10:00:00")
+    event = Event(date=date.today(), start_time=time(10, 0))
     db_session.add(event)
     db_session.commit()
     

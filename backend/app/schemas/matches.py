@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator, ValidationInfo
+from pydantic import BaseModel, Field, field_validator, ValidationInfo, ConfigDict
 from typing import Optional, List
 from datetime import date, time
 from enum import Enum
@@ -13,16 +13,14 @@ class PlayerMatchInfo(BaseModel):
     firstname: str
     lastname: str
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class TeamMatchInfo(BaseModel):
     id: int
     company: str
     players: List[PlayerMatchInfo]
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class MatchCreate(BaseModel):
     date: date
@@ -115,5 +113,4 @@ class MatchResponse(BaseModel):
     team1: TeamMatchInfo
     team2: TeamMatchInfo
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

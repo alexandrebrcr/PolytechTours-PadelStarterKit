@@ -111,7 +111,7 @@ def login(credentials: LoginRequest, db: Session = Depends(get_db)):
     return TokenResponse(
         access_token=access_token,
         token_type="bearer",
-        user=UserResponse.from_orm(user)
+        user=UserResponse.model_validate(user)
     )
 
 @router.post("/change-password")

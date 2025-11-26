@@ -37,7 +37,7 @@ def create_player(
     if db.query(Player).filter(Player.license_number == player.license_number).first():
         raise HTTPException(400, "Numéro de licence déjà utilisé")
         
-    db_player = Player(**player.dict())
+    db_player = Player(**player.model_dump())
     db.add(db_player)
     db.commit()
     db.refresh(db_player)
@@ -63,7 +63,7 @@ def update_player(
     if not db_player:
         raise HTTPException(404, "Joueur non trouvé")
         
-    update_data = player_update.dict(exclude_unset=True)
+    update_data = player_update.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_player, key, value)
         
