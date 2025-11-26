@@ -79,6 +79,66 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function updateProfile(data) {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await authAPI.updateProfile(data)
+      user.value = response.data
+      localStorage.setItem('user', JSON.stringify(user.value))
+      return { success: true }
+    } catch (err) {
+      error.value = err.response?.data?.detail || 'Erreur lors de la mise à jour'
+      return { success: false, error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function changePassword(current, newP, confirmP) {
+    loading.value = true
+    error.value = null
+    try {
+      await authAPI.changePassword(current, newP, confirmP)
+      return { success: true }
+    } catch (err) {
+      error.value = err.response?.data?.detail || 'Erreur lors du changement de mot de passe'
+      return { success: false, error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function uploadAvatar(file) {
+    loading.value = true
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const response = await authAPI.uploadAvatar(formData)
+      user.value = response.data
+      localStorage.setItem('user', JSON.stringify(user.value))
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: err.response?.data?.detail || 'Erreur upload' }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function deleteAvatar() {
+    loading.value = true
+    try {
+      const response = await authAPI.deleteAvatar()
+      user.value = response.data
+      localStorage.setItem('user', JSON.stringify(user.value))
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: err.response?.data?.detail }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     user,
     token,
@@ -88,6 +148,10 @@ export const useAuthStore = defineStore('auth', () => {
     isAdmin,
     login,
     logout,
-    checkAuth
+    checkAuth,
+    updateProfile,
+    changePassword,
+    uploadAvatar,
+    deleteAvatar
   }
 })

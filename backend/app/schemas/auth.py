@@ -3,6 +3,8 @@
 # ============================================
 
 from pydantic import BaseModel, EmailStr, Field, validator
+from typing import Optional
+from datetime import date
 import re
 
 class LoginRequest(BaseModel):
@@ -13,11 +15,40 @@ class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
+class UserUpdate(BaseModel):
+    firstname: str = Field(..., min_length=2, max_length=50)
+    lastname: str = Field(..., min_length=2, max_length=50)
+    email: EmailStr
+    birthdate: Optional[date] = None
+
+    @validator('firstname', 'lastname')
+    def validate_name(cls, v):
+        if not re.match(r"^[a-zA-Z\s\-\']+$", v):
+            raise ValueError("Le nom/prénom ne doit contenir que des lettres, espaces, tirets et apostrophes")
+        return v
+
+    @validator('birthdate')
+    def validate_age(cls, v):
+        if v is None:
+            return v
+        today = date.today()
+        age = today.year - v.year - ((today.month, today.day) < (v.month, v.day))
+        if age < 16:
+            raise ValueError("L'utilisateur doit avoir au moins 16 ans")
+        if v > today:
+            raise ValueError("La date de naissance ne peut pas être dans le futur")
+        return v
+
 class UserResponse(BaseModel):
     id: int
     email: str
     role: str
     must_change_password: bool
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
+    birthdate: Optional[date] = None
+    license_number: Optional[str] = None
+    profile_picture: Optional[str] = None
     
     class Config:
         from_attributes = True

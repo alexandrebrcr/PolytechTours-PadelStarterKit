@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.api import auth
 from app.database import engine
 from app.models import models
+import os
 
 # Créer les tables
 models.Base.metadata.create_all(bind=engine)
@@ -13,6 +15,12 @@ app = FastAPI(
     description="API pour la gestion de tournois corporatifs de padel",
     version="1.0.0"
 )
+
+# Créer le dossier static s'il n'existe pas
+os.makedirs("static/uploads", exist_ok=True)
+
+# Servir les fichiers statiques
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Configuration CORS
 app.add_middleware(

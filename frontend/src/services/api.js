@@ -52,7 +52,17 @@ export const authAPI = {
       current_password: currentPassword,
       new_password: newPassword,
       confirm_password: confirmPassword
-    })
+    }),
+
+  getProfile: () => api.get('/auth/me'),
+  
+  updateProfile: (data) => api.put('/auth/me', data),
+  
+  uploadAvatar: (formData) => api.post('/auth/me/avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  
+  deleteAvatar: () => api.delete('/auth/me/avatar')
 }
 
 export default api

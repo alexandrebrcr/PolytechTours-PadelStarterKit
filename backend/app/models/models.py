@@ -2,7 +2,7 @@
 # FICHIER : backend/app/models/models.py
 # ============================================
 
-from sqlalchemy import Boolean, Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Boolean, Column, Integer, String, DateTime, ForeignKey, Date
 from sqlalchemy.sql import func
 from app.database import Base
 
@@ -13,6 +13,11 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
     role = Column(String, nullable=False)  # JOUEUR ou ADMINISTRATEUR
+    firstname = Column(String, nullable=True)
+    lastname = Column(String, nullable=True)
+    birthdate = Column(Date, nullable=True)
+    license_number = Column(String, nullable=True)
+    profile_picture = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     must_change_password = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

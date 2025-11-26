@@ -6,6 +6,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import HomePage from '../views/HomePage.vue'
 import LoginPage from '../views/LoginPage.vue'
+import ProfilePage from '../views/ProfilePage.vue'
 
 const routes = [
   {
@@ -19,8 +20,14 @@ const routes = [
     name: 'login',
     component: LoginPage,
     meta: { requiresAuth: false }
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: ProfilePage,
+    meta: { requiresAuth: true }
   }
-  // TODO: Ajouter les autres routes (Planning, Matchs, Résultats, Admin, Profil)
+  // TODO: Ajouter les autres routes (Planning, Matchs, Résultats, Admin)
 ]
 
 const router = createRouter({
