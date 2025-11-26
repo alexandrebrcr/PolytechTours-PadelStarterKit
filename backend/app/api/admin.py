@@ -7,7 +7,8 @@ from app.schemas.admin import (
     PlayerCreate, PlayerUpdate, PlayerResponse,
     TeamCreate, TeamResponse,
     PoolCreate, PoolResponse,
-    AccountCreate, AccountResponse
+    AccountCreate, AccountResponse,
+    RoleUpdate
 )
 from app.api.deps import get_current_user
 from app.core.security import get_password_hash
@@ -91,7 +92,7 @@ def delete_player(
 @router.put("/players/{player_id}/role")
 def change_player_role(
     player_id: int,
-    role: str,
+    role_update: RoleUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -103,12 +104,12 @@ def change_player_role(
     if not player.user:
         raise HTTPException(400, "Ce joueur n'a pas de compte utilisateur")
         
-    if role not in ["JOUEUR", "ADMINISTRATEUR"]:
+    if role_update.role not in ["JOUEUR", "ADMINISTRATEUR"]:
         raise HTTPException(400, "Rôle invalide")
         
-    player.user.role = role
+    player.user.role = role_update.role
     db.commit()
-    return {"message": f"Rôle mis à jour : {role}"}
+    return {"message": f"Rôle mis à jour : {role_update.role}"}
 
 # --- Teams ---
 

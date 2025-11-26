@@ -214,7 +214,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 import api from '../services/api'
+
+const router = useRouter()
+const authStore = useAuthStore()
 
 const currentTab = ref('players')
 const tabs = [
@@ -312,6 +317,20 @@ async function changeRole(playerId, newRole) {
   if (!confirm(`Voulez-vous vraiment changer le rôle en ${newRole} ?`)) return
   try {
     await api.put(`/admin/players/${playerId}/role`, { role: newRole })
+    
+    // Gestion de l'auto-rétrogradation
+    if (authStore.user?.player_id === playerId && newRole !== 'ADMINISTRATEUR') {
+      alert("Vous avez modifié votre propre rôle. Vous n'avez plus accès à cette page.")
+      
+      // Mettre à jour le store et le localStorage
+      const updatedUser = { ...authStore.user, role: newRole }
+      authStore.user = updatedUser
+      localStorage.setItem('user', JSON.stringify(updatedUser))
+      
+      router.push('/')
+      return
+    }
+
     loadData()
   } catch (err) {
     alert(err.response?.data?.detail || 'Erreur')

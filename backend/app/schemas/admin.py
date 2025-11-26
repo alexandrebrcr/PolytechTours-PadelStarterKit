@@ -85,3 +85,6 @@ class AccountCreate(BaseModel):
 class AccountResponse(BaseModel):
     email: str
     temp_password: str
+
+class RoleUpdate(BaseModel):
+    role: str

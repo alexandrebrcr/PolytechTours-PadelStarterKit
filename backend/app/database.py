@@ -40,8 +40,8 @@ def init_db():
             )
             db.add(admin)
             db.commit()
-            print("✅ Admin créé : admin@padel.com / Admin@2025!")
+            # Admin created
         else:
-            print("ℹ️  Admin existe déjà")
+            pass
     finally:
         db.close()

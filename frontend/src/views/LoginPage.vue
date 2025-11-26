@@ -67,14 +67,35 @@
             <span v-else>Se connecter</span>
           </button>
         </form>
+      </div>
+    </div>
 
-        <!-- Informations de test -->
-        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-          <p class="text-xs text-gray-600 text-center">
-            <strong>Compte de test :</strong><br>
-            admin@padel.com / Admin@2025!
-          </p>
-        </div>
+    <!-- Change Password Modal -->
+    <div v-if="showChangePasswordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+      <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Changement de mot de passe requis</h2>
+        <p class="text-gray-600 mb-6">C'est votre première connexion. Veuillez changer votre mot de passe pour continuer.</p>
+        
+        <form @submit.prevent="handleChangePassword">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nouveau mot de passe</label>
+            <input v-model="newPassword" type="password" required minlength="12" class="w-full px-4 py-2 border rounded-lg">
+            <p class="text-xs text-gray-500 mt-1">12 caractères min, majuscule, minuscule, chiffre, caractère spécial.</p>
+          </div>
+          
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Confirmer le mot de passe</label>
+            <input v-model="confirmPassword" type="password" required class="w-full px-4 py-2 border rounded-lg">
+          </div>
+
+          <div v-if="modalError" class="mb-4 p-3 bg-red-50 text-red-700 rounded text-sm whitespace-pre-wrap">
+            {{ modalError }}
+          </div>
+
+          <button type="submit" class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            Changer le mot de passe
+          </button>
+        </form>
       </div>
     </div>
   </div>
@@ -95,6 +116,12 @@ const errorMessage = ref('')
 const attemptsRemaining = ref(null)
 const minutesRemaining = ref(null)
 
+// Modal state
+const showChangePasswordModal = ref(false)
+const newPassword = ref('')
+const confirmPassword = ref('')
+const modalError = ref('')
+
 const handleLogin = async () => {
   loading.value = true
   errorMessage.value = ''
@@ -104,7 +131,11 @@ const handleLogin = async () => {
   const result = await authStore.login(email.value, password.value)
 
   if (result.success) {
-    router.push('/')
+    if (authStore.user?.must_change_password) {
+      showChangePasswordModal.value = true
+    } else {
+      router.push('/')
+    }
   } else {
     errorMessage.value = result.error || 'Erreur de connexion'
     attemptsRemaining.value = result.attemptsRemaining ?? null
@@ -112,5 +143,21 @@ const handleLogin = async () => {
   }
 
   loading.value = false
+}
+
+const handleChangePassword = async () => {
+  if (newPassword.value !== confirmPassword.value) {
+    modalError.value = "Les mots de passe ne correspondent pas"
+    return
+  }
+
+  const result = await authStore.changePassword(password.value, newPassword.value, confirmPassword.value)
+  
+  if (result.success) {
+    showChangePasswordModal.value = false
+    router.push('/')
+  } else {
+    modalError.value = result.error
+  }
 }
 </script>

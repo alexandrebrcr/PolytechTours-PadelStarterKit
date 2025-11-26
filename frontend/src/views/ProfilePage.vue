@@ -171,7 +171,7 @@
       <div v-if="message.text" :class="['rounded-md p-4', message.type === 'error' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700']">
         <div class="flex">
           <div class="ml-3">
-            <p class="text-sm font-medium">{{ message.text }}</p>
+            <p class="text-sm font-medium whitespace-pre-wrap">{{ message.text }}</p>
           </div>
         </div>
       </div>

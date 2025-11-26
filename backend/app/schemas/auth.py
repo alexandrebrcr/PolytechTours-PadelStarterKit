@@ -49,6 +49,7 @@ class UserResponse(BaseModel):
     birthdate: Optional[date] = None
     license_number: Optional[str] = None
     profile_picture: Optional[str] = None
+    player_id: Optional[int] = None
     
     class Config:
         from_attributes = True

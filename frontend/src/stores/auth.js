@@ -102,7 +102,22 @@ export const useAuthStore = defineStore('auth', () => {
       await authAPI.changePassword(current, newP, confirmP)
       return { success: true }
     } catch (err) {
-      error.value = err.response?.data?.detail || 'Erreur lors du changement de mot de passe'
+      let errorMessage = 'Erreur lors du changement de mot de passe'
+      const detail = err.response?.data?.detail
+
+      if (Array.isArray(detail)) {
+        // Pydantic validation errors
+        errorMessage = detail.map(e => {
+            if (e.msg.startsWith('Value error, ')) {
+                return e.msg.replace('Value error, ', '')
+            }
+            return e.msg
+        }).join('\n')
+      } else if (typeof detail === 'string') {
+        errorMessage = detail
+      }
+      
+      error.value = errorMessage
       return { success: false, error: error.value }
     } finally {
       loading.value = false
