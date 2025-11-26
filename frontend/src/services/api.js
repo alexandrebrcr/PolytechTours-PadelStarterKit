@@ -71,6 +71,20 @@ export const authAPI = {
 
   // Teams
   getTeams: () => api.get('/admin/teams'),
+  
+  // Pools
+  getPools: () => api.get('/admin/pools'),
+}
+
+export const matchesAPI = {
+  getMatches: (params) => api.get('/matches', { params }),
+  createMatch: (data) => api.post('/matches', data),
+  updateMatch: (id, data) => api.put(`/matches/${id}`, data),
+  deleteMatch: (id) => api.delete(`/matches/${id}`)
+}
+
+export const resultsAPI = {
+  getRanking: () => api.get('/results/ranking')
 }
 
 export default api

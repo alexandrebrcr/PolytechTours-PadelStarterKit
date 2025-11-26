@@ -8,6 +8,8 @@ import HomePage from '../views/HomePage.vue'
 import LoginPage from '../views/LoginPage.vue'
 import ProfilePage from '../views/ProfilePage.vue'
 import AdminPage from '../views/AdminPage.vue'
+import MatchesPage from '../views/MatchesPage.vue'
+import ResultsPage from '../views/ResultsPage.vue'
 
 const routes = [
   {
@@ -33,8 +35,20 @@ const routes = [
     name: 'admin',
     component: AdminPage,
     meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/matches',
+    name: 'matches',
+    component: MatchesPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/results',
+    name: 'results',
+    component: ResultsPage,
+    meta: { requiresAuth: true }
   }
-  // TODO: Ajouter les autres routes (Planning, Matchs, Résultats)
+  // TODO: Ajouter les autres routes (Planning)
 ]
 
 const router = createRouter({
