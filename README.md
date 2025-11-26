@@ -76,7 +76,7 @@ source venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 cp .env.example .env
 # Générer une SECRET_KEY : python -c "import secrets; print(secrets.token_urlsafe(32))"
-python -c "from app.database import init_db; init_db()"
+python3 -c "from app.database import init_db; init_db()"
 uvicorn app.main:app --reload
 ```
 
@@ -117,3 +117,15 @@ Toutes les autres fonctionnalités selon le cahier des charges :
 ## 📞 Support
 
 Consultez le README détaillé dans backend/ et frontend/
+
+## Commandes utiles
+
+Pour l'execution des tests backend
+```bash
+pytest
+```
+
+Pour l'execution des tests frontend
+```bash
+npx cypress run
+```

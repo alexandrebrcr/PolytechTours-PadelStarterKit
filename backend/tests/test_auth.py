@@ -29,11 +29,11 @@ def test_login_invalid_email(client, test_user):
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     data = response.json()
     assert "detail" in data
-    # Le message d'erreur peut être dans detail ou detail.message selon l'implémentation
-    if isinstance(data["detail"], dict):
-        assert "message" in data["detail"]
-    else:
-        assert isinstance(data["detail"], str)
+    # L'implémentation actuelle renvoie un dictionnaire pour uniformiser les erreurs de login
+    assert isinstance(data["detail"], dict)
+    assert "message" in data["detail"]
+    assert data["detail"]["message"] == "Email ou mot de passe incorrect"
+    assert "attempts_remaining" in data["detail"]
 
 def test_login_invalid_password(client, test_user):
     """Test connexion avec mot de passe invalide"""
@@ -44,14 +44,12 @@ def test_login_invalid_password(client, test_user):
     
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     data = response.json()
-    # Vérifier la structure de la réponse d'erreur
     assert "detail" in data
-    if isinstance(data["detail"], dict):
-        assert "attempts_remaining" in data["detail"]
-    else:
-        # Si c'est une string, c'est peut-être une erreur générique
-        # Mais notre implémentation renvoie un dict pour les tentatives
-        pass
+    assert isinstance(data["detail"], dict)
+    assert "message" in data["detail"]
+    assert data["detail"]["message"] == "Email ou mot de passe incorrect"
+    assert "attempts_remaining" in data["detail"]
+    assert isinstance(data["detail"]["attempts_remaining"], int)
 
 def test_brute_force_protection(client, test_user):
     """Test blocage après 5 tentatives échouées"""
@@ -64,8 +62,12 @@ def test_brute_force_protection(client, test_user):
         # La 5ème tentative (i=4) déclenche le blocage et renvoie 403
         if i < 4:
             assert response.status_code == status.HTTP_401_UNAUTHORIZED
+            data = response.json()
+            assert data["detail"]["attempts_remaining"] == 5 - (i + 1)
         else:
             assert response.status_code == status.HTTP_403_FORBIDDEN
+            data = response.json()
+            assert "Compte bloqué" in data["detail"]["message"]
     
     # La 6ème tentative doit être bloquée même avec le bon mot de passe
     response = client.post("/api/v1/auth/login", json={
@@ -75,10 +77,10 @@ def test_brute_force_protection(client, test_user):
     
     assert response.status_code == status.HTTP_403_FORBIDDEN
     data = response.json()
-    assert "detail" in data
-    if isinstance(data["detail"], dict):
-        assert "locked_until" in data["detail"]
-        assert "minutes_remaining" in data["detail"]
+    assert isinstance(data["detail"], dict)
+    assert "locked_until" in data["detail"]
+    assert "minutes_remaining" in data["detail"]
+    assert data["detail"]["minutes_remaining"] > 0
 
 def test_login_inactive_user(client, db_session, test_user):
     """Test connexion avec compte désactivé"""

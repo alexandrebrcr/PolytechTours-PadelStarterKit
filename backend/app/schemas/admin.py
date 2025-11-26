@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import List, Optional
 import re
 
@@ -10,13 +10,15 @@ class PlayerBase(BaseModel):
     license_number: str
     email: EmailStr
 
-    @validator('firstname', 'lastname')
+    @field_validator('firstname', 'lastname')
+    @classmethod
     def validate_name(cls, v):
         if not re.match(r"^[a-zA-Z\s]+$", v):
             raise ValueError("Le nom/prénom ne doit contenir que des lettres et espaces")
         return v
 
-    @validator('license_number')
+    @field_validator('license_number')
+    @classmethod
     def validate_license(cls, v):
         if not re.match(r"^L\d{6}$", v):
             raise ValueError("Le numéro de licence doit être au format LXXXXXX")
@@ -30,7 +32,8 @@ class PlayerUpdate(BaseModel):
     lastname: Optional[str] = Field(None, min_length=2, max_length=50)
     company: Optional[str] = Field(None, min_length=2, max_length=100)
     
-    @validator('firstname', 'lastname')
+    @field_validator('firstname', 'lastname')
+    @classmethod
     def validate_name(cls, v):
         if v and not re.match(r"^[a-zA-Z\s]+$", v):
             raise ValueError("Le nom/prénom ne doit contenir que des lettres et espaces")
@@ -64,7 +67,8 @@ class PoolCreate(BaseModel):
     name: str
     team_ids: List[int]
 
-    @validator('team_ids')
+    @field_validator('team_ids')
+    @classmethod
     def validate_team_count(cls, v):
         if len(v) != 6:
             raise ValueError("Une poule doit contenir exactement 6 équipes")

@@ -39,7 +39,7 @@
         <!-- Menu utilisateur -->
         <div class="flex items-center space-x-4">
           <router-link to="/profile" class="px-3 py-2 rounded hover:bg-blue-700">
-            👤 {{ authStore.user?.email }}
+            👤 {{ authStore.user?.firstname || authStore.user?.email }}
           </router-link>
           <button 
             @click="handleLogout" 

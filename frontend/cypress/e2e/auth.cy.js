@@ -23,8 +23,9 @@ describe('Authentification', () => {
     
     // Vérifier la redirection vers la page d'accueil
     cy.url().should('eq', 'http://localhost:5173/')
-    cy.contains('Bonjour').should('be.visible')
-    cy.contains('admin@padel.com').should('be.visible')
+    // Bonjour a été retiré, on affiche directement l'identifiant
+    // Comme on a mis "Admin System" dans init_db, on doit voir ça
+    cy.contains('Admin System').should('be.visible')
   })
 
   it('Connexion échoue avec email invalide', () => {
@@ -158,7 +159,8 @@ describe('Authentification', () => {
       
       // 5. Vérifier redirection
       cy.url().should('eq', 'http://localhost:5173/')
-      cy.contains('Bonjour').should('be.visible')
+      // On doit voir le Prénom Nom
+      cy.contains(`${firstname} ${lastname}`).should('be.visible')
     })
   })
 })

@@ -2,7 +2,7 @@
 # FICHIER : backend/app/schemas/auth.py
 # ============================================
 
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, ValidationInfo
 from typing import Optional
 from datetime import date
 import re
@@ -21,13 +21,15 @@ class UserUpdate(BaseModel):
     email: EmailStr
     birthdate: Optional[date] = None
 
-    @validator('firstname', 'lastname')
+    @field_validator('firstname', 'lastname')
+    @classmethod
     def validate_name(cls, v):
         if not re.match(r"^[a-zA-Z\s\-\']+$", v):
             raise ValueError("Le nom/prénom ne doit contenir que des lettres, espaces, tirets et apostrophes")
         return v
 
-    @validator('birthdate')
+    @field_validator('birthdate')
+    @classmethod
     def validate_age(cls, v):
         if v is None:
             return v
@@ -64,7 +66,8 @@ class ChangePasswordRequest(BaseModel):
     new_password: str = Field(..., min_length=12)
     confirm_password: str
     
-    @validator('new_password')
+    @field_validator('new_password')
+    @classmethod
     def validate_password(cls, v):
         if len(v) < 12:
             raise ValueError('Le mot de passe doit contenir au moins 12 caractères')
@@ -78,8 +81,9 @@ class ChangePasswordRequest(BaseModel):
             raise ValueError('Le mot de passe doit contenir au moins un caractère spécial')
         return v
     
-    @validator('confirm_password')
-    def passwords_match(cls, v, values):
-        if 'new_password' in values and v != values['new_password']:
+    @field_validator('confirm_password')
+    @classmethod
+    def passwords_match(cls, v, info: ValidationInfo):
+        if 'new_password' in info.data and v != info.data['new_password']:
             raise ValueError('Les mots de passe ne correspondent pas')
         return v

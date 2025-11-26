@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
 from app.core.config import settings
 
 engine = create_engine(
@@ -36,7 +35,9 @@ def init_db():
                 email="admin@padel.com",
                 password_hash=get_password_hash("Admin@2025!"),
                 role="ADMINISTRATEUR",
-                is_active=True
+                is_active=True,
+                firstname="Admin",
+                lastname="System"
             )
             db.add(admin)
             db.commit()

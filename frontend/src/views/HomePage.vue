@@ -36,7 +36,7 @@
 
       <div v-else class="space-y-6">
         <p class="text-2xl text-gray-700">
-          Bonjour <span class="font-semibold text-blue-600">{{ authStore.user?.email }}</span> ! 👋
+          <span class="font-semibold text-blue-600">{{ authStore.user?.firstname ? `${authStore.user.firstname} ${authStore.user.lastname}` : authStore.user?.email }}</span> ! 👋
         </p>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">

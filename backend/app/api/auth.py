@@ -2,7 +2,7 @@
 # FICHIER : backend/app/api/auth.py
 # ============================================
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -24,22 +24,27 @@ def check_and_update_attempts(db: Session, email: str, success: bool = False):
     attempt = db.query(LoginAttempt).filter(LoginAttempt.email == email).first()
     
     if not attempt:
-        attempt = LoginAttempt(email=email)
+        attempt = LoginAttempt(email=email, attempts_count=0)
         db.add(attempt)
     
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     
     # Vérifier si le compte est bloqué
-    if attempt.locked_until and attempt.locked_until > now:
-        minutes_remaining = int((attempt.locked_until - now).total_seconds() / 60)
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={
-                "message": "Compte bloqué",
-                "locked_until": attempt.locked_until.isoformat(),
-                "minutes_remaining": minutes_remaining
-            }
-        )
+    if attempt.locked_until:
+        # S'assurer que locked_until est aware (SQLite peut renvoyer du naïf)
+        if attempt.locked_until.tzinfo is None:
+            attempt.locked_until = attempt.locked_until.replace(tzinfo=timezone.utc)
+            
+        if attempt.locked_until > now:
+            minutes_remaining = int((attempt.locked_until - now).total_seconds() / 60)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "message": "Compte bloqué",
+                    "locked_until": attempt.locked_until.isoformat(),
+                    "minutes_remaining": minutes_remaining
+                }
+            )
     
     if success:
         # Réinitialiser les tentatives en cas de succès
