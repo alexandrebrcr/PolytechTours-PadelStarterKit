@@ -76,3 +76,23 @@ def test_admin(db_session):
     db_session.commit()
     db_session.refresh(admin)
     return admin
+
+@pytest.fixture
+def user_token_headers(client, test_user):
+    """Retourne les headers d'authentification pour l'utilisateur de test"""
+    response = client.post("/api/v1/auth/login", json={
+        "email": "test@example.com",
+        "password": "ValidP@ssw0rd123"
+    })
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+@pytest.fixture
+def admin_token_headers(client, test_admin):
+    """Retourne les headers d'authentification pour l'administrateur de test"""
+    response = client.post("/api/v1/auth/login", json={
+        "email": "admin@example.com",
+        "password": "AdminP@ssw0rd123"
+    })
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}

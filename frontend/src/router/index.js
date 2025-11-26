@@ -7,6 +7,7 @@ import { useAuthStore } from '../stores/auth'
 import HomePage from '../views/HomePage.vue'
 import LoginPage from '../views/LoginPage.vue'
 import ProfilePage from '../views/ProfilePage.vue'
+import AdminPage from '../views/AdminPage.vue'
 
 const routes = [
   {
@@ -26,8 +27,14 @@ const routes = [
     name: 'profile',
     component: ProfilePage,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: AdminPage,
+    meta: { requiresAuth: true, requiresAdmin: true }
   }
-  // TODO: Ajouter les autres routes (Planning, Matchs, Résultats, Admin)
+  // TODO: Ajouter les autres routes (Planning, Matchs, Résultats)
 ]
 
 const router = createRouter({
@@ -41,6 +48,8 @@ router.beforeEach((to, from, next) => {
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next('/login')
+  } else if (to.meta.requiresAdmin && !authStore.isAdmin) {
+    next('/')
   } else if (to.path === '/login' && authStore.isAuthenticated) {
     next('/')
   } else {
