@@ -16,11 +16,11 @@ describe('Authentification', () => {
 
   it('Connexion réussie avec credentials valides', () => {
     cy.visit('/login')
-    
+
     cy.get('input[type="email"]').type('admin@padel.com')
     cy.get('input[type="password"]').type('Admin@2025!')
     cy.get('button[type="submit"]').click()
-    
+
     // Vérifier la redirection vers la page d'accueil
     cy.url().should('eq', 'http://localhost:5173/')
     // Bonjour a été retiré, on affiche directement l'identifiant
@@ -30,12 +30,12 @@ describe('Authentification', () => {
 
   it('Connexion échoue avec email invalide', () => {
     cy.visit('/login')
-    
+
     const randomEmail = `wrong_${Date.now()}@example.com`
     cy.get('input[type="email"]').type(randomEmail)
     cy.get('input[type="password"]').type('Admin@2025!')
     cy.get('button[type="submit"]').click()
-    
+
     // Vérifier le message d'erreur
     cy.contains('Email ou mot de passe incorrect').should('be.visible')
     cy.contains('Tentatives restantes').should('be.visible')
@@ -43,20 +43,20 @@ describe('Authentification', () => {
 
   it('Connexion échoue avec mot de passe invalide', () => {
     cy.visit('/login')
-    
+
     cy.get('input[type="email"]').type('admin@padel.com')
     cy.get('input[type="password"]').type('WrongPassword')
     cy.get('button[type="submit"]').click()
-    
+
     // Vérifier le message d'erreur
     cy.contains('Email ou mot de passe incorrect').should('be.visible')
   })
 
   it('Bloque le compte après 5 tentatives échouées', () => {
     cy.visit('/login')
-    
+
     const lockedEmail = `locked_${Date.now()}@test.com`
-    
+
     // Faire 4 tentatives échouées (compte passe à 4 tentatives)
     for (let i = 0; i < 4; i++) {
       cy.get('input[type="email"]').clear().type(lockedEmail)
@@ -69,7 +69,7 @@ describe('Authentification', () => {
     cy.get('input[type="email"]').clear().type(lockedEmail)
     cy.get('input[type="password"]').clear().type('WrongPassword')
     cy.get('button[type="submit"]').click()
-    
+
     // Vérifier le message de blocage
     cy.contains('Compte bloqué').should('be.visible')
     cy.contains('minutes').should('be.visible')
@@ -82,13 +82,13 @@ describe('Authentification', () => {
     cy.get('input[type="email"]').type('admin@padel.com')
     cy.get('input[type="password"]').type('Admin@2025!')
     cy.get('button[type="submit"]').click()
-    
+
     // Attendre la redirection
     cy.url().should('eq', 'http://localhost:5173/')
-    
+
     // Essayer d'accéder à /login
     cy.visit('/login')
-    
+
     // Devrait être redirigé vers l'accueil
     cy.url().should('eq', 'http://localhost:5173/')
   })
@@ -99,16 +99,16 @@ describe('Authentification', () => {
     cy.get('input[type="email"]').type('admin@padel.com')
     cy.get('input[type="password"]').type('Admin@2025!')
     cy.get('button[type="submit"]').click()
-    
+
     // Vérifier que l'utilisateur est connecté
     cy.url().should('eq', 'http://localhost:5173/')
-    
+
     // Se déconnecter
     cy.contains('Déconnexion').click()
-    
+
     // Vérifier la redirection vers login
     cy.url().should('include', '/login')
-    
+
     // Vérifier que le token est supprimé
     cy.window().then((win) => {
       expect(win.localStorage.getItem('token')).to.be.null
@@ -128,7 +128,7 @@ describe('Authentification', () => {
     cy.get('input[type="email"]').type('admin@padel.com')
     cy.get('input[type="password"]').type('Admin@2025!')
     cy.get('button[type="submit"]').click()
-    
+
     // Créer joueur
     cy.contains('Administration').click()
     cy.contains('Joueurs').click() // Ensure tab is active
@@ -139,23 +139,23 @@ describe('Authentification', () => {
     cy.get('input[type="email"]').type(newEmail)
     cy.get('input[placeholder="N° Licence (LXXXXXX)"]').type(license)
     cy.contains('button', 'Enregistrer').click()
-    
+
     // Créer compte (trouver le bouton dans la ligne du joueur)
     cy.contains('tr', firstname).contains('Créer compte').click()
-    
+
     // Récupérer le mot de passe temporaire
     cy.get('.bg-yellow-100').invoke('text').then((tempPassword) => {
       cy.contains('Fermer').click()
       cy.contains('Déconnexion').click()
-      
+
       // 2. Première connexion du nouvel utilisateur
       cy.get('input[type="email"]').type(newEmail)
       cy.get('input[type="password"]').type(tempPassword)
       cy.get('button[type="submit"]').click()
-      
+
       // 3. Vérifier la modale
       cy.contains('Changement de mot de passe requis').should('be.visible')
-      
+
       // 4. Changer le mot de passe
       const newPass = 'NewPass123!@#'
       // Le premier input password est celui du login (caché par la modale mais présent), 
@@ -163,7 +163,7 @@ describe('Authentification', () => {
       cy.get('input[type="password"]').eq(1).type(newPass) // Nouveau mdp
       cy.get('input[type="password"]').eq(2).type(newPass) // Confirm
       cy.contains('button', 'Changer le mot de passe').click()
-      
+
       // 5. Vérifier redirection
       cy.url().should('eq', 'http://localhost:5173/')
       // On doit voir le Prénom Nom

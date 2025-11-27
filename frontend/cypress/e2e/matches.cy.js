@@ -1,28 +1,29 @@
 describe('Matches Management', () => {
   const timestamp = Date.now()
+  // Use letters only for names to pass backend validation
   const player1 = {
-    firstname: `P1_${timestamp}`,
+    firstname: 'Pierre',
     lastname: 'Test',
     company: 'CompA',
     email: `p1_${timestamp}@test.com`,
     license: `L${timestamp.toString().slice(-6)}`
   }
   const player2 = {
-    firstname: `P2_${timestamp}`,
+    firstname: 'Paul',
     lastname: 'Test',
     company: 'CompA',
     email: `p2_${timestamp}@test.com`,
     license: `L${(timestamp + 1).toString().slice(-6)}`
   }
   const player3 = {
-    firstname: `P3_${timestamp}`,
+    firstname: 'Jacques',
     lastname: 'Test',
     company: 'CompB',
     email: `p3_${timestamp}@test.com`,
     license: `L${(timestamp + 2).toString().slice(-6)}`
   }
   const player4 = {
-    firstname: `P4_${timestamp}`,
+    firstname: 'Jean',
     lastname: 'Test',
     company: 'CompB',
     email: `p4_${timestamp}@test.com`,
@@ -36,7 +37,7 @@ describe('Matches Management', () => {
   it('should allow admin to create teams and a match', () => {
     // 1. Create Players
     cy.visit('/admin')
-    
+
     const createPlayer = (p) => {
       cy.contains('button', 'Ajouter un joueur').click()
       cy.get('input[placeholder="Prénom"]').type(p.firstname)
@@ -55,7 +56,7 @@ describe('Matches Management', () => {
 
     // 2. Create Teams
     cy.contains('button', 'Équipes').click()
-    
+
     // Team A
     cy.contains('button', 'Créer une équipe').click()
     cy.get('input[placeholder="Entreprise"]').type('Team A')
@@ -77,17 +78,17 @@ describe('Matches Management', () => {
     // 3. Create Match
     cy.visit('/matches')
     cy.contains('button', 'Ajouter un match').click()
-    
+
     cy.get('input[type="date"]').type('2025-06-15')
     cy.get('input[type="time"]').type('14:00')
     cy.get('input[type="number"]').clear().type('1')
-    
+
     // Select teams
     cy.get('select').eq(0).select('Team A')
     cy.get('select').eq(1).select('Team B')
-    
+
     cy.contains('button', 'Enregistrer').click()
-    
+
     // 4. Verify Match
     cy.contains('Dimanche 15 juin 2025').should('exist')
     cy.contains('Team A').should('exist')

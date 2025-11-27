@@ -38,7 +38,7 @@ describe('Administration', () => {
 
       // 4. Le promouvoir Admin
       cy.contains('tr', firstname).contains('Promouvoir Admin').click()
-      
+
       // 5. Se déconnecter
       cy.contains('Déconnexion').click()
 
@@ -56,7 +56,7 @@ describe('Administration', () => {
 
       // 7. Aller sur la page admin
       cy.contains('Administration').click()
-      
+
       // 8. Se rétrograder
       // On doit trouver la ligne correspondant à notre utilisateur
       cy.contains('tr', firstname).within(() => {
@@ -66,7 +66,7 @@ describe('Administration', () => {
       // 9. Vérifier la redirection et l'absence du menu Admin
       cy.url().should('eq', 'http://localhost:5173/')
       cy.contains('Administration').should('not.exist')
-      
+
       // 10. Vérifier qu'on ne peut plus accéder à /admin
       cy.visit('/admin')
       cy.url().should('eq', 'http://localhost:5173/')

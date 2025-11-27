@@ -91,7 +91,7 @@ npm run dev
 ## 🔐 Compte de test
 
 - **Email** : admin@padel.com
-- **Mot de passe** : Admin@2025!
+- **Mot de passe** : Test@2025_2026
 
 ## 📚 Documentation
 

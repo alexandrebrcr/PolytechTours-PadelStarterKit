@@ -18,3 +18,17 @@ Cypress.Commands.add('login', (email, password) => {
     cy.visit(route)
     cy.url().should('include', '/login')
   })
+  
+  // Commande pour réinitialiser la base de données
+  Cypress.Commands.add('resetDb', () => {
+    cy.request({
+      method: 'POST',
+      url: 'http://localhost:8000/api/v1/test/reset-db',
+      failOnStatusCode: true
+    })
+  })
+  
+  // Reset DB before each test to ensure clean state
+  beforeEach(() => {
+    cy.resetDb()
+  })

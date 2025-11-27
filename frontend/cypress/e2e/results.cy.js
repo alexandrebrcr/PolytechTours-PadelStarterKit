@@ -1,28 +1,28 @@
 describe('Results Management', () => {
   const timestamp = Date.now()
   const player1 = {
-    firstname: `R1_${timestamp}`,
+    firstname: 'Alice',
     lastname: 'Test',
     company: 'ResCompA',
     email: `r1_${timestamp}@test.com`,
     license: `L${timestamp.toString().slice(-6)}`
   }
   const player2 = {
-    firstname: `R2_${timestamp}`,
+    firstname: 'Bob',
     lastname: 'Test',
     company: 'ResCompA',
     email: `r2_${timestamp}@test.com`,
     license: `L${(timestamp + 1).toString().slice(-6)}`
   }
   const player3 = {
-    firstname: `R3_${timestamp}`,
+    firstname: 'Charlie',
     lastname: 'Test',
     company: 'ResCompB',
     email: `r3_${timestamp}@test.com`,
     license: `L${(timestamp + 2).toString().slice(-6)}`
   }
   const player4 = {
-    firstname: `R4_${timestamp}`,
+    firstname: 'David',
     lastname: 'Test',
     company: 'ResCompB',
     email: `r4_${timestamp}@test.com`,
@@ -37,7 +37,7 @@ describe('Results Management', () => {
     // 1. Setup: Create Players & Teams & Match
     // (Ideally this should be done via API to speed up tests, but UI is fine for E2E)
     cy.visit('/admin')
-    
+
     const createPlayer = (p) => {
       cy.contains('button', 'Ajouter un joueur').click()
       cy.get('input[placeholder="Prénom"]').type(p.firstname)
@@ -55,7 +55,7 @@ describe('Results Management', () => {
     createPlayer(player4)
 
     cy.contains('button', 'Équipes').click()
-    
+
     // Team A
     cy.contains('button', 'Créer une équipe').click()
     cy.get('input[placeholder="Entreprise"]').type('ResTeam A')
@@ -79,7 +79,7 @@ describe('Results Management', () => {
     cy.get('select').eq(0).select('ResTeam A')
     cy.get('select').eq(1).select('ResTeam B')
     cy.contains('button', 'Enregistrer').click()
-    
+
     // 2. Enter Results
     // Find the match card (assuming it's the one we just created, or filter by team)
     cy.contains('ResTeam A').parents('.border-l-4').within(() => {
