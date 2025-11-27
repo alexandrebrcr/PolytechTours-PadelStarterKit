@@ -57,14 +57,18 @@ describe('Authentification', () => {
     
     const lockedEmail = `locked_${Date.now()}@test.com`
     
-    // Faire 5 tentatives échouées
-    for (let i = 0; i < 5; i++) {
+    // Faire 4 tentatives échouées (compte passe à 4 tentatives)
+    for (let i = 0; i < 4; i++) {
       cy.get('input[type="email"]').clear().type(lockedEmail)
       cy.get('input[type="password"]').clear().type('WrongPassword')
       cy.get('button[type="submit"]').click()
-      // Attendre que le message d'erreur apparaisse avant de continuer
       cy.contains('Email ou mot de passe incorrect').should('be.visible')
     }
+
+    // 5ème tentative : doit bloquer
+    cy.get('input[type="email"]').clear().type(lockedEmail)
+    cy.get('input[type="password"]').clear().type('WrongPassword')
+    cy.get('button[type="submit"]').click()
     
     // Vérifier le message de blocage
     cy.contains('Compte bloqué').should('be.visible')
@@ -165,5 +169,14 @@ describe('Authentification', () => {
       // On doit voir le Prénom Nom
       cy.contains(`${firstname} ${lastname}`).should('be.visible')
     })
+  })
+
+  it('Affiche la modale de mot de passe oublié', () => {
+    cy.visit('/login')
+    cy.contains('Mot de passe oublié ?').click()
+    cy.contains('Veuillez contacter votre administrateur local').should('be.visible')
+    cy.contains('contact.support@padel.com').should('be.visible')
+    cy.contains('button', 'Fermer').click()
+    cy.contains('Veuillez contacter votre administrateur local').should('not.exist')
   })
 })

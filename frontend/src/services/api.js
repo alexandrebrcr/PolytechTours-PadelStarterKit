@@ -29,8 +29,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expiré ou invalide
+    // Ne pas rediriger si c'est une erreur de login (401 normal)
+    if (error.response?.status === 401 && !error.config.url.includes('/auth/login')) {
+      // Token expiré ou invalide sur une autre route
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       window.location.href = '/login'
@@ -85,6 +86,12 @@ export const matchesAPI = {
 
 export const resultsAPI = {
   getRanking: () => api.get('/results/ranking')
+}
+
+export const planningAPI = {
+  getEvents: (params) => api.get('/planning', { params }),
+  createEvent: (data) => api.post('/planning', data),
+  deleteEvent: (id) => api.delete(`/planning/${id}`)
 }
 
 export default api

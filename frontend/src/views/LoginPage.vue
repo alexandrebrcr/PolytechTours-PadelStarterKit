@@ -31,7 +31,7 @@
           </div>
 
           <!-- Mot de passe -->
-          <div class="mb-6">
+          <div class="mb-2">
             <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
               Mot de passe
             </label>
@@ -43,6 +43,17 @@
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="••••••••"
             />
+          </div>
+
+          <!-- Mot de passe oublié -->
+          <div class="flex justify-end mb-6">
+            <button 
+              type="button" 
+              @click="showForgotPasswordModal = true"
+              class="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Mot de passe oublié ?
+            </button>
           </div>
 
           <!-- Message d'erreur -->
@@ -98,6 +109,18 @@
         </form>
       </div>
     </div>
+
+    <!-- Forgot Password Modal -->
+    <div v-if="showForgotPasswordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+      <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md text-center">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Mot de passe oublié</h2>
+        <p class="text-gray-600 mb-4">Veuillez contacter votre administrateur local.</p>
+        <p class="text-blue-600 font-bold text-lg mb-6">contact.support@padel.com</p>
+        <button @click="showForgotPasswordModal = false" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          Fermer
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -118,6 +141,7 @@ const minutesRemaining = ref(null)
 
 // Modal state
 const showChangePasswordModal = ref(false)
+const showForgotPasswordModal = ref(false)
 const newPassword = ref('')
 const confirmPassword = ref('')
 const modalError = ref('')

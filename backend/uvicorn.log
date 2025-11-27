@@ -1,0 +1,98 @@
+INFO:     Will watch for changes in these directories: ['/home/alexandre_brcr/Documents/POLYTECH/5A/Test & Sécurité logicielle/PolytechTours-PadelStarterKit/backend']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [22861] using WatchFiles
+INFO:     Started server process [22863]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_planning.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [22863]
+WARNING:  WatchFiles detected changes in 'tests/test_planning.py'. Reloading...
+INFO:     Started server process [23046]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_planning.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [23046]
+INFO:     Started server process [23062]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_planning.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [23062]
+INFO:     Started server process [23087]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_planning.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [23087]
+INFO:     Started server process [23103]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:57176 - "OPTIONS /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57176 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57176 - "OPTIONS /api/v1/planning?start_date=2025-09-30&end_date=2025-12-30 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57176 - "GET /api/v1/planning?start_date=2025-09-30&end_date=2025-12-30 HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:57176 - "OPTIONS /api/v1/planning/?start_date=2025-09-30&end_date=2025-12-30 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57176 - "GET /api/v1/planning/?start_date=2025-09-30&end_date=2025-12-30 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57176 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57176 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52914 - "OPTIONS /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52914 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52914 - "OPTIONS /api/v1/planning?start_date=2025-10-01&end_date=2025-12-31 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52914 - "GET /api/v1/planning?start_date=2025-10-01&end_date=2025-12-31 HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:52914 - "OPTIONS /api/v1/planning/?start_date=2025-10-01&end_date=2025-12-31 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52920 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52928 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56640 - "OPTIONS /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56640 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56640 - "OPTIONS /api/v1/planning?start_date=2025-10-01&end_date=2025-12-31 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56640 - "GET /api/v1/planning?start_date=2025-10-01&end_date=2025-12-31 HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:56640 - "OPTIONS /api/v1/planning/?start_date=2025-10-01&end_date=2025-12-31 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56640 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56640 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app/api/deps.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [23103]
+WARNING:  WatchFiles detected changes in 'app/api/deps.py'. Reloading...
+INFO:     Started server process [26316]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/api/auth.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26316]
+INFO:     Started server process [26735]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:59696 - "OPTIONS /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59696 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59696 - "OPTIONS /api/v1/planning?start_date=2025-10-01&end_date=2025-12-31 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59696 - "GET /api/v1/planning?start_date=2025-10-01&end_date=2025-12-31 HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:59696 - "OPTIONS /api/v1/planning/?start_date=2025-10-01&end_date=2025-12-31 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59696 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59696 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35482 - "OPTIONS /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35496 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35496 - "OPTIONS /api/v1/planning?start_date=2025-10-01&end_date=2025-12-31 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35482 - "GET /api/v1/planning?start_date=2025-10-01&end_date=2025-12-31 HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:35482 - "OPTIONS /api/v1/planning/?start_date=2025-10-01&end_date=2025-12-31 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35496 - "GET /api/v1/planning/?start_date=2025-10-01&end_date=2025-12-31 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51822 - "OPTIONS /api/v1/planning?start_date=2025-11-01&end_date=2026-01-31 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51830 - "GET /api/v1/planning?start_date=2025-11-01&end_date=2026-01-31 HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:51830 - "OPTIONS /api/v1/planning/?start_date=2025-11-01&end_date=2026-01-31 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51822 - "GET /api/v1/planning/?start_date=2025-11-01&end_date=2026-01-31 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51822 - "OPTIONS /api/v1/admin/teams HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51830 - "GET /api/v1/admin/teams HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58168 - "GET /api/v1/admin/teams HTTP/1.1" 200 OK

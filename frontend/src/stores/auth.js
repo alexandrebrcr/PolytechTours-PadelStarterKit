@@ -50,6 +50,8 @@ export const useAuthStore = defineStore('auth', () => {
       setAuth(access_token, userData)
       return { success: true }
     } catch (err) {
+      console.log('Login error:', err)
+      console.log('Response data:', err.response?.data)
       const errorData = err.response?.data?.detail
       
       if (typeof errorData === 'object') {

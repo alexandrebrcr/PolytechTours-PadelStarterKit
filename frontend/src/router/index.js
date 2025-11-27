@@ -10,6 +10,7 @@ import ProfilePage from '../views/ProfilePage.vue'
 import AdminPage from '../views/AdminPage.vue'
 import MatchesPage from '../views/MatchesPage.vue'
 import ResultsPage from '../views/ResultsPage.vue'
+import PlanningPage from '../views/PlanningPage.vue'
 
 const routes = [
   {
@@ -47,8 +48,13 @@ const routes = [
     name: 'results',
     component: ResultsPage,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/planning',
+    name: 'planning',
+    component: PlanningPage,
+    meta: { requiresAuth: true }
   }
-  // TODO: Ajouter les autres routes (Planning)
 ]
 
 const router = createRouter({
