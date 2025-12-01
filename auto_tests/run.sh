@@ -21,6 +21,12 @@ fuser -k 5173/tcp 2>/dev/null
 echo "Starting Backend (TESTING mode)..."
 cd ../backend
 export TESTING=True
+# Remove existing database to ensure clean state
+if [ -f "padel_corpo.db" ]; then
+    rm padel_corpo.db
+    echo "Removed existing database."
+fi
+
 # Check if venv exists
 if [ -d "venv" ]; then
     source venv/bin/activate
@@ -31,7 +37,7 @@ fi
 
 # Initialize Database
 echo "Initializing Database..."
-python3 -c "from app.database import init_db; init_db()"
+python3 -c "from app.database import init_db_test; init_db_test()"
 
 uvicorn app.main:app --port 8000 > ../auto_tests/backend.log 2>&1 &
 BACKEND_PID=$!
@@ -48,7 +54,7 @@ if ! kill -0 $BACKEND_PID 2>/dev/null; then
 fi
 
 # Start Frontend
-echo "Starting Frontend..."
+echo "Starting Frontend..." 
 cd frontend
 npm run dev -- --port 5173 > ../auto_tests/frontend.log 2>&1 &
 FRONTEND_PID=$!
@@ -57,6 +63,13 @@ cd ..
 # Wait for frontend to be ready
 echo "Waiting for Frontend..."
 sleep 5
+
+# Run Pytest
+echo "Running Pytest Tests..."
+cd backend
+pytest
+cd ..
+EXIT_CODE=$?
 
 # Run Cypress
 echo "Running Cypress Tests..."

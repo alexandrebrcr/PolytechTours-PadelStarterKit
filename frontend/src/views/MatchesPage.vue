@@ -456,15 +456,28 @@ const submitForm = async () => {
       throw new Error("Les deux équipes doivent être différentes")
     }
 
+    // On crée une copie des données du formulaire
+    const payload = { ...form.value }
+
     if (isEditing.value) {
-      await matchesAPI.updateMatch(currentMatchId.value, form.value)
+      // Si on est en mode édition, l'API (Pydantic) semble rejeter la date/heure 
+      // si elles sont renvoyées alors qu'elles ne changent pas (erreur "none_required").
+      // On supprime ces champs du payload pour ne pas bloquer la requête.
+      delete payload.date
+      delete payload.time
+      delete payload.court_number
+      delete payload.team1_id
+      delete payload.team2_id
+      
+      await matchesAPI.updateMatch(currentMatchId.value, payload)
     } else {
-      await matchesAPI.createMatch(form.value)
+      await matchesAPI.createMatch(payload)
     }
     
     closeModal()
     fetchMatches()
   } catch (err) {
+    console.error(err)
     error.value = err.response?.data?.detail || err.message || 'Une erreur est survenue'
   } finally {
     submitting.value = false

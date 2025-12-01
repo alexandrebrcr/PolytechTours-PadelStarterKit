@@ -40,11 +40,13 @@ describe('Gestion du Profil', () => {
   it('Valide les champs du formulaire de profil', () => {
     // Nom invalide (chiffres)
     cy.contains('Prénom').next('input').clear().type('Jean123')
+    // Remplir la date pour passer la validation HTML5
+    cy.contains('Date de naissance').next('input').type('1990-01-01')
     cy.contains('Enregistrer').click()
 
     // Le backend doit renvoyer une erreur car le nom contient des chiffres
     // Le composant ProfilePage affiche l'erreur dans une notification
-    cy.contains('Le nom/prénom ne doit contenir que des lettres').should('be.visible')
+    cy.contains('Le nom/prénom ne doit contenir que des lettres, espaces, tirets et apostrophes').should('be.visible')
   })
 
   it('Permet de changer le mot de passe', () => {

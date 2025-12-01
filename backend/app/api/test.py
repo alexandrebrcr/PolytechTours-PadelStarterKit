@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.database import get_db, engine, init_db
+from app.database import get_db, engine, init_db_test
 from app.models import models
 from app.core.config import settings
 
@@ -18,7 +18,7 @@ def reset_database():
     # Drop all tables
     models.Base.metadata.drop_all(bind=engine)
     
-    # Re-init DB (creates tables and admin user)
-    init_db()
+    # Re-init DB (creates tables and admin user AND test data)
+    init_db_test()
     
     return {"message": "Database reset successfully"}

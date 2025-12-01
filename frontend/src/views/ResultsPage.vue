@@ -138,16 +138,15 @@ const ranking = ref([])
 const fetchHistory = async () => {
   loading.value = true
   try {
-    // On récupère tous les matchs terminés
-    // Le backend filtre déjà pour le joueur connecté si non-admin
-    // Mais pour l'historique perso, on veut voir ses matchs.
-    // Si admin, il verra tout, mais l'onglet s'appelle "Mes Résultats"...
-    // Pour l'instant on utilise le endpoint matches avec status=TERMINE
+    // On récupère l'année actuelle (ex: 2025)
+    const currentYear = new Date().getFullYear()
+
     const response = await matchesAPI.getMatches({
       status: 'TERMINE',
-      start_date: '2024-01-01', // Depuis le début de l'année/saison
-      end_date: '2025-12-31'
+      start_date: '2024-01-01', 
+      end_date: `${currentYear + 1}-12-31` 
     })
+    
     // Tri par date décroissante
     history.value = response.data.sort((a, b) => new Date(b.date) - new Date(a.date))
   } catch (err) {
