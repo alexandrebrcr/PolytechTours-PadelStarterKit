@@ -18,7 +18,7 @@ describe('Authentification', () => {
     cy.visit('/login')
 
     cy.get('input[type="email"]').type('admin@padel.com')
-    cy.get('input[type="password"]').type('Admin@2025!')
+    cy.get('input[type="password"]').type('Test@2025_2026')
     cy.get('button[type="submit"]').click()
 
     // Vérifier la redirection vers la page d'accueil
@@ -33,7 +33,7 @@ describe('Authentification', () => {
 
     const randomEmail = `wrong_${Date.now()}@example.com`
     cy.get('input[type="email"]').type(randomEmail)
-    cy.get('input[type="password"]').type('Admin@2025!')
+    cy.get('input[type="password"]').type('Test@2025_2026')
     cy.get('button[type="submit"]').click()
 
     // Vérifier le message d'erreur
@@ -80,7 +80,7 @@ describe('Authentification', () => {
     // Se connecter d'abord
     cy.visit('/login')
     cy.get('input[type="email"]').type('admin@padel.com')
-    cy.get('input[type="password"]').type('Admin@2025!')
+    cy.get('input[type="password"]').type('Test@2025_2026')
     cy.get('button[type="submit"]').click()
 
     // Attendre la redirection
@@ -97,7 +97,7 @@ describe('Authentification', () => {
     // Se connecter
     cy.visit('/login')
     cy.get('input[type="email"]').type('admin@padel.com')
-    cy.get('input[type="password"]').type('Admin@2025!')
+    cy.get('input[type="password"]').type('Test@2025_2026')
     cy.get('button[type="submit"]').click()
 
     // Vérifier que l'utilisateur est connecté
@@ -126,7 +126,7 @@ describe('Authentification', () => {
     // 1. Admin crée le compte
     cy.visit('/login')
     cy.get('input[type="email"]').type('admin@padel.com')
-    cy.get('input[type="password"]').type('Admin@2025!')
+    cy.get('input[type="password"]').type('Test@2025_2026')
     cy.get('button[type="submit"]').click()
 
     // Créer joueur

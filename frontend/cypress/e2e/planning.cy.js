@@ -1,6 +1,6 @@
 describe('Planning Management', () => {
     beforeEach(() => {
-        cy.login('admin@padel.com', 'Admin@2025!')
+        cy.login('admin@padel.com', 'Test@2025_2026')
     })
 
     it('should display planning page', () => {

@@ -24,7 +24,7 @@ describe('Navigation', () => {
     // Se connecter
     cy.visit('/login')
     cy.get('input[type="email"]').type('admin@padel.com')
-    cy.get('input[type="password"]').type('Admin@2025!')
+    cy.get('input[type="password"]').type('Test@2025_2026')
     cy.get('button[type="submit"]').click()
 
     // Vérifier que la navbar est visible
@@ -40,7 +40,7 @@ describe('Navigation', () => {
     // Se connecter en tant qu'admin
     cy.visit('/login')
     cy.get('input[type="email"]').type('admin@padel.com')
-    cy.get('input[type="password"]').type('Admin@2025!')
+    cy.get('input[type="password"]').type('Test@2025_2026')
     cy.get('button[type="submit"]').click()
 
     // Vérifier que le lien Administration est visible

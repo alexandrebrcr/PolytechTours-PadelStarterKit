@@ -9,7 +9,7 @@ Cypress.Commands.add('login', (email, password) => {
   
   // Commande pour se connecter en tant qu'admin
   Cypress.Commands.add('loginAsAdmin', () => {
-    cy.login('admin@padel.com', 'Admin@2025!')
+    cy.login('admin@padel.com', 'Test@2025_2026')
   })
   
   // Commande pour vérifier qu'une route est protégée

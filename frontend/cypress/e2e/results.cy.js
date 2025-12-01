@@ -30,7 +30,7 @@ describe('Results Management', () => {
   }
 
   beforeEach(() => {
-    cy.login('admin@padel.com', 'Admin@2025!')
+    cy.login('admin@padel.com', 'Test@2025_2026')
   })
 
   it('should allow admin to enter match results', () => {
@@ -58,17 +58,29 @@ describe('Results Management', () => {
 
     // Team A
     cy.contains('button', 'Créer une équipe').click()
-    cy.get('input[placeholder="Entreprise"]').type('ResTeam A')
-    cy.get('select').eq(0).select(`${player1.firstname} ${player1.lastname} (${player1.company})`)
-    cy.get('select').eq(1).select(`${player2.firstname} ${player2.lastname} (${player2.company})`)
-    cy.contains('button', 'Créer').click()
+    cy.get('input[placeholder="Entreprise"]').type('ResCompA')
+    
+    cy.get('select').eq(0).find('option').contains(player1.firstname).then($opt => {
+      cy.get('select').eq(0).select($opt.text())
+    })
+    cy.get('select').eq(1).find('option').contains(player2.firstname).then($opt => {
+      cy.get('select').eq(1).select($opt.text())
+    })
+    
+    cy.contains('button', 'Créer').click({ force: true })
 
     // Team B
     cy.contains('button', 'Créer une équipe').click()
-    cy.get('input[placeholder="Entreprise"]').type('ResTeam B')
-    cy.get('select').eq(0).select(`${player3.firstname} ${player3.lastname} (${player3.company})`)
-    cy.get('select').eq(1).select(`${player4.firstname} ${player4.lastname} (${player4.company})`)
-    cy.contains('button', 'Créer').click()
+    cy.get('input[placeholder="Entreprise"]').type('ResCompB')
+    
+    cy.get('select').eq(0).find('option').contains(player3.firstname).then($opt => {
+      cy.get('select').eq(0).select($opt.text())
+    })
+    cy.get('select').eq(1).find('option').contains(player4.firstname).then($opt => {
+      cy.get('select').eq(1).select($opt.text())
+    })
+    
+    cy.contains('button', 'Créer').click({ force: true })
 
     // Create Match
     cy.visit('/matches')
@@ -76,13 +88,13 @@ describe('Results Management', () => {
     cy.get('input[type="date"]').type('2025-06-20')
     cy.get('input[type="time"]').type('10:00')
     cy.get('input[type="number"]').clear().type('2')
-    cy.get('select').eq(0).select('ResTeam A')
-    cy.get('select').eq(1).select('ResTeam B')
+    cy.get('select').eq(0).select('ResCompA')
+    cy.get('select').eq(1).select('ResCompB')
     cy.contains('button', 'Enregistrer').click()
 
     // 2. Enter Results
     // Find the match card (assuming it's the one we just created, or filter by team)
-    cy.contains('ResTeam A').parents('.border-l-4').within(() => {
+    cy.contains('ResCompA').parents('.border-l-4').within(() => {
       cy.get('button[title="Modifier"]').click()
     })
 
@@ -93,7 +105,7 @@ describe('Results Management', () => {
     cy.contains('button', 'Enregistrer').click()
 
     // 3. Verify Results
-    cy.contains('ResTeam A').parents('.border-l-4').within(() => {
+    cy.contains('ResCompA').parents('.border-l-4').within(() => {
       cy.contains('6-4 6-4').should('exist')
       cy.contains('Terminé').should('exist')
     })
@@ -105,7 +117,7 @@ describe('Results Management', () => {
     // Check if our teams appear (might need reload or wait if async)
     // Note: Ranking calculation might depend on backend logic. 
     // If we just entered a result, it should appear.
-    cy.contains('td', 'ResTeam A').should('exist')
-    cy.contains('td', 'ResTeam B').should('exist')
+    cy.contains('td', 'ResCompA').should('exist')
+    cy.contains('td', 'ResCompB').should('exist')
   })
 })

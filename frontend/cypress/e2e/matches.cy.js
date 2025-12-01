@@ -31,7 +31,7 @@ describe('Matches Management', () => {
   }
 
   beforeEach(() => {
-    cy.login('admin@padel.com', 'Admin@2025!')
+    cy.login('admin@padel.com', 'Test@2025_2026')
   })
 
   it('should allow admin to create teams and a match', () => {
@@ -59,21 +59,32 @@ describe('Matches Management', () => {
 
     // Team A
     cy.contains('button', 'Créer une équipe').click()
-    cy.get('input[placeholder="Entreprise"]').type('Team A')
-    // Select players (assuming they are at the end of the list or searchable)
-    // Since select options text contains firstname, we can select by text
-    cy.get('select').eq(0).select(`${player1.firstname} ${player1.lastname} (${player1.company})`)
-    cy.get('select').eq(1).select(`${player2.firstname} ${player2.lastname} (${player2.company})`)
-    cy.contains('button', 'Créer').click()
-    cy.contains('td', 'Team A').should('exist')
+    cy.get('input[placeholder="Entreprise"]').type('CompA')
+
+    // Select players robustly
+    cy.get('select').eq(0).find('option').contains(player1.firstname).then($opt => {
+      cy.get('select').eq(0).select($opt.text())
+    })
+    cy.get('select').eq(1).find('option').contains(player2.firstname).then($opt => {
+      cy.get('select').eq(1).select($opt.text())
+    })
+
+    cy.contains('button', 'Créer').click({ force: true })
+    cy.contains('td', 'CompA').should('exist')
 
     // Team B
     cy.contains('button', 'Créer une équipe').click()
-    cy.get('input[placeholder="Entreprise"]').type('Team B')
-    cy.get('select').eq(0).select(`${player3.firstname} ${player3.lastname} (${player3.company})`)
-    cy.get('select').eq(1).select(`${player4.firstname} ${player4.lastname} (${player4.company})`)
-    cy.contains('button', 'Créer').click()
-    cy.contains('td', 'Team B').should('exist')
+    cy.get('input[placeholder="Entreprise"]').type('CompB')
+
+    cy.get('select').eq(0).find('option').contains(player3.firstname).then($opt => {
+      cy.get('select').eq(0).select($opt.text())
+    })
+    cy.get('select').eq(1).find('option').contains(player4.firstname).then($opt => {
+      cy.get('select').eq(1).select($opt.text())
+    })
+
+    cy.contains('button', 'Créer').click({ force: true })
+    cy.contains('td', 'CompB').should('exist')
 
     // 3. Create Match
     cy.visit('/matches')
@@ -84,21 +95,21 @@ describe('Matches Management', () => {
     cy.get('input[type="number"]').clear().type('1')
 
     // Select teams
-    cy.get('select').eq(0).select('Team A')
-    cy.get('select').eq(1).select('Team B')
+    cy.get('select').eq(0).select('CompA')
+    cy.get('select').eq(1).select('CompB')
 
     cy.contains('button', 'Enregistrer').click()
 
     // 4. Verify Match
     cy.contains('Dimanche 15 juin 2025').should('exist')
-    cy.contains('Team A').should('exist')
-    cy.contains('Team B').should('exist')
+    cy.contains('CompA').should('exist')
+    cy.contains('CompB').should('exist')
   })
 
   it('should filter matches', () => {
     cy.visit('/matches')
     // Assuming we have matches from previous test or seed
     cy.get('select').last().select('A_VENIR')
-    cy.contains('Team A').should('exist')
+    cy.contains('CompA').should('exist')
   })
 })

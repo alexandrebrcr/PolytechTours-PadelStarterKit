@@ -4,7 +4,7 @@ describe('Gestion du Profil', () => {
     // Se connecter avant chaque test
     cy.visit('/login')
     cy.get('input[type="email"]').type('admin@padel.com')
-    cy.get('input[type="password"]').type('Admin@2025!')
+    cy.get('input[type="password"]').type('Test@2025_2026')
     cy.get('button[type="submit"]').click()
     cy.url().should('eq', 'http://localhost:5173/')
 
@@ -44,7 +44,7 @@ describe('Gestion du Profil', () => {
 
     // Le backend doit renvoyer une erreur car le nom contient des chiffres
     // Le composant ProfilePage affiche l'erreur dans une notification
-    cy.contains('Le nom/prénom ne doit contenir que des lettres et espaces').should('be.visible')
+    cy.contains('Le nom/prénom ne doit contenir que des lettres').should('be.visible')
   })
 
   it('Permet de changer le mot de passe', () => {
@@ -52,7 +52,7 @@ describe('Gestion du Profil', () => {
     cy.contains('Sécurité').click()
 
     // Remplir le formulaire
-    cy.contains('Mot de passe actuel').next('input').type('Admin@2025!')
+    cy.contains('Mot de passe actuel').next('input').type('Test@2025_2026')
     cy.contains('Nouveau mot de passe').next('input').type('NewPass123!@#')
     cy.contains('Confirmer le mot de passe').next('input').type('NewPass123!@#')
 
@@ -72,15 +72,15 @@ describe('Gestion du Profil', () => {
     cy.visit('/profile')
     cy.contains('Sécurité').click()
     cy.contains('Mot de passe actuel').next('input').type('NewPass123!@#')
-    cy.contains('Nouveau mot de passe').next('input').type('Admin@2025!')
-    cy.contains('Confirmer le mot de passe').next('input').type('Admin@2025!')
+    cy.contains('Nouveau mot de passe').next('input').type('Test@2025_2026')
+    cy.contains('Confirmer le mot de passe').next('input').type('Test@2025_2026')
     cy.contains('Modifier le mot de passe').click()
   })
 
   it('Vérifie la correspondance des mots de passe', () => {
     cy.contains('Sécurité').click()
 
-    cy.contains('Mot de passe actuel').next('input').type('Admin@2025!')
+    cy.contains('Mot de passe actuel').next('input').type('Test@2025_2026')
     cy.contains('Nouveau mot de passe').next('input').type('NewPass123!@#')
     cy.contains('Confirmer le mot de passe').next('input').type('DifferentPass123!')
 

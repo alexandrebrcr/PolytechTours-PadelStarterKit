@@ -33,7 +33,7 @@ def init_db():
         if not admin:
             admin = User(
                 email="admin@padel.com",
-                password_hash=get_password_hash("Admin@2025!"),
+                password_hash=get_password_hash("Test@2025_2026"),
                 role="ADMINISTRATEUR",
                 is_active=True,
                 firstname="Admin",

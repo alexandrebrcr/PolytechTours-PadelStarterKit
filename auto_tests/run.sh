@@ -29,7 +29,11 @@ else
     exit 1
 fi
 
-uvicorn app.main:app --port 8000 > ../backend.log 2>&1 &
+# Initialize Database
+echo "Initializing Database..."
+python3 -c "from app.database import init_db; init_db()"
+
+uvicorn app.main:app --port 8000 > ../auto_tests/backend.log 2>&1 &
 BACKEND_PID=$!
 cd ..
 
@@ -46,7 +50,7 @@ fi
 # Start Frontend
 echo "Starting Frontend..."
 cd frontend
-npm run dev -- --port 5173 > ../frontend.log 2>&1 &
+npm run dev -- --port 5173 > ../auto_tests/frontend.log 2>&1 &
 FRONTEND_PID=$!
 cd ..
 

@@ -16,7 +16,7 @@ describe('Administration', () => {
     // 1. Connexion Admin Suprême
     cy.visit('/login')
     cy.get('input[type="email"]').type('admin@padel.com')
-    cy.get('input[type="password"]').type('Admin@2025!')
+    cy.get('input[type="password"]').type('Test@2025_2026')
     cy.get('button[type="submit"]').click()
 
     // 2. Créer un nouveau joueur qui sera admin
