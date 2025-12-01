@@ -8,6 +8,10 @@ dist/
 node_modules
 /dist
 
+*.db
+*.jpg
+backend/.coverage
+
 # Log files
 npm-debug.log*
 yarn-debug.log*
