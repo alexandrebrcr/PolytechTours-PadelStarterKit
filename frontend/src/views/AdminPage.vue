@@ -294,6 +294,12 @@ async function savePlayer() {
 }
 
 async function deletePlayer(id) {
+  const player = players.value.find(p => p.id === id)
+  if (player && authStore.user && player.email === authStore.user.email) {
+    alert("Impossible de supprimer votre propre compte")
+    return
+  }
+
   if (!confirm("Attention, cette action est irréversible")) return
   try {
     await api.delete(`/admin/players/${id}`)

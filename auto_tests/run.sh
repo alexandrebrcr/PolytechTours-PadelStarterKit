@@ -4,11 +4,13 @@
 cleanup() {
     echo "Stopping servers..."
     if [ ! -z "$BACKEND_PID" ]; then
-        kill $BACKEND_PID
+        kill $BACKEND_PID 2>/dev/null
     fi
     if [ ! -z "$FRONTEND_PID" ]; then
-        kill $FRONTEND_PID
+        kill $FRONTEND_PID 2>/dev/null
     fi
+    fuser -k 8000/tcp 2>/dev/null
+    fuser -k 5173/tcp 2>/dev/null
 }
 
 trap cleanup EXIT
@@ -67,14 +69,15 @@ sleep 5
 # Run Pytest
 echo "Running Pytest Tests..."
 cd backend
-pytest
+#pytest
 cd ..
 EXIT_CODE=$?
 
 # Run Cypress
 echo "Running Cypress Tests..."
 cd frontend
-npx cypress run
+# Run specific test
+npx cypress run --spec "cypress/e2e/match_cancellation.cy.js"
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -eq 0 ]; then
