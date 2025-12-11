@@ -23,12 +23,12 @@ describe('Matches Management', () => {
   })
 
   it('should allow admin to update a match', () => {
-    // Create a match first
+    // Create a match first (Use different court/time to avoid conflict with previous test)
     cy.contains('Ajouter un match').click()
     cy.get('.fixed.z-50').within(() => {
       cy.get('input[type="date"]').type(new Date().toISOString().split('T')[0])
-      cy.get('input[type="time"]').type('14:00')
-      cy.get('input[type="number"]').clear().type('2')
+      cy.get('input[type="time"]').type('15:00')
+      cy.get('input[type="number"]').clear().type('3')
       cy.get('select').eq(0).find('option').eq(0).then(opt => cy.get('select').eq(0).select(opt.val()))
       cy.get('select').eq(1).find('option').eq(1).then(opt => cy.get('select').eq(1).select(opt.val()))
       cy.contains('button', 'Enregistrer').click()
@@ -39,34 +39,62 @@ describe('Matches Management', () => {
     cy.get('button[title="Modifier"]').first().click()
 
     cy.get('.fixed.z-50').within(() => {
-      cy.get('input[type="number"]').clear().type('3')
+      cy.get('input[type="number"]').clear().type('4')
       
       // Test score update
       cy.get('select').last().select('Terminé')
       cy.get('input[placeholder="Ex: 6-4, 6-2"]').type('6-4, 6-2')
       cy.contains('Le score de l\'équipe 2 sera calculé automatiquement : 4-6, 2-6').should('be.visible')
       
-      cy.contains('button', 'Enregistrer').click()
+      cy.contains('button', 'Enregistrer').click({ force: true })
+      // Check if error message appears
+      cy.get('.bg-red-100').should('not.exist')
     })
 
     cy.get('.fixed.z-50').should('not.exist')
-    cy.contains('Piste 3').should('be.visible')
+    cy.wait(500) // Wait for list refresh
+    cy.contains('Piste 4').should('be.visible')
     cy.contains('6-4, 6-2').should('be.visible')
   })
 
   it('should validate score format', () => {
+    // Create a match first
     cy.contains('Ajouter un match').click()
-    
     cy.get('.fixed.z-50').within(() => {
         cy.get('input[type="date"]').type(new Date().toISOString().split('T')[0])
         cy.get('input[type="time"]').type('14:00')
         cy.get('input[type="number"]').clear().type('2')
         cy.get('select').eq(0).find('option').eq(0).then(opt => cy.get('select').eq(0).select(opt.val()))
         cy.get('select').eq(1).find('option').eq(1).then(opt => cy.get('select').eq(1).select(opt.val()))
-        
+        cy.contains('button', 'Enregistrer').click()
+    })
+    cy.get('.fixed.z-50').should('not.exist')
+
+    // Edit match to test score validation
+    cy.get('button[title="Modifier"]').first().click()
+    
+    cy.get('.fixed.z-50').within(() => {
         cy.get('select').last().select('Terminé')
+        
+        // Test invalid format
         cy.get('input[placeholder="Ex: 6-4, 6-2"]').type('invalid')
-        cy.contains('Le score de l\'équipe 2 sera calculé automatiquement : invalid').should('be.visible')
+        cy.contains('button', 'Enregistrer').click({ force: true })
+        cy.contains('Format de score invalide').should('be.visible')
+
+        // Test 1 set only (should fail regex)
+        cy.get('input[placeholder="Ex: 6-4, 6-2"]').clear().type('6-4')
+        cy.contains('button', 'Enregistrer').click({ force: true })
+        cy.contains('Format de score invalide').should('be.visible')
+
+        // Test 1-1 draw (should fail new rule)
+        cy.get('input[placeholder="Ex: 6-4, 6-2"]').clear().type('6-4, 4-6')
+        cy.contains('button', 'Enregistrer').click({ force: true })
+        cy.contains('Il faut au moins 2 sets gagnants').should('be.visible')
+
+        // Test 3 sets where first 2 are enough (should fail)
+        cy.get('input[placeholder="Ex: 6-4, 6-2"]').clear().type('6-4, 6-4, 6-4')
+        cy.contains('button', 'Enregistrer').click({ force: true })
+        cy.contains('Le match est déjà terminé après 2 sets gagnants').should('be.visible')
     })
   })
 
@@ -198,6 +226,7 @@ describe('Match Filters', () => {
     cy.get('input[placeholder="N° Licence (LXXXXXX)"]').type(`L${timestamp.toString().slice(-6)}`)
     cy.contains('button', 'Enregistrer').click()
     cy.contains('h3', 'Ajouter un joueur').should('not.exist')
+    cy.get('.fixed.inset-0').should('not.exist')
 
     // Player 2
     cy.contains('Ajouter un joueur').click()
@@ -208,18 +237,21 @@ describe('Match Filters', () => {
     cy.get('input[placeholder="N° Licence (LXXXXXX)"]').type(`L${(timestamp + 1).toString().slice(-6)}`)
     cy.contains('button', 'Enregistrer').click()
     cy.contains('h3', 'Ajouter un joueur').should('not.exist')
+    cy.get('.fixed.inset-0').should('not.exist')
 
     // 1. Create Team
     cy.contains('button', 'Équipes').click()
-    cy.contains('Créer une équipe').click()
-    cy.get('input[placeholder="Entreprise"]').type(companyName)
+    cy.wait(500) // Wait for tab switch
+    cy.contains('Créer une équipe').click({ force: true })
+    cy.get('input[placeholder="Nom d\'équipe"]').type(companyName)
 
     // Select players (recherche par texte partiel)
     cy.get('select').eq(0).contains('Fan One').then($opt => cy.get('select').eq(0).select($opt.val()))
     cy.get('select').eq(1).contains('Fan Two').then($opt => cy.get('select').eq(1).select($opt.val()))
 
-    cy.contains('button', 'Créer').click()
-    cy.get('h3').contains('Créer une équipe').should('not.exist')
+    // Use specific selector for the modal button to avoid matching "Créer une équipe"
+    cy.get('.fixed.inset-0 button').contains('Créer').click()
+    cy.contains('h3', 'Créer une équipe').should('not.exist')
 
     // 2. Create Match
     cy.visit('/matches')

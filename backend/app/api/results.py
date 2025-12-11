@@ -50,9 +50,6 @@ def get_ranking(db: Session = Depends(get_db), current_user = Depends(get_curren
         if not match.score_team1:
             continue
             
-        # Parser le score
-        # On suppose que score_team1 est le score vu par l'équipe 1
-        # Format "6-4, 6-3"
         try:
             sets = match.score_team1.split(", ")
             t1_sets = 0

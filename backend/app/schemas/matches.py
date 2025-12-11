@@ -17,7 +17,7 @@ class PlayerMatchInfo(BaseModel):
 
 class TeamMatchInfo(BaseModel):
     id: int
-    company: str
+    name: str
     players: List[PlayerMatchInfo]
     
     model_config = ConfigDict(from_attributes=True)
@@ -61,7 +61,7 @@ class MatchUpdate(BaseModel):
             return None
         
         if not re.match(r"^\d+-\d+(, \d+-\d+){1,2}$", v):
-            raise ValueError("Format de score invalide. Attendu : 'X-Y, X-Y' (ex: 6-4, 6-3)")
+            raise ValueError("Format de score invalide")
         
         sets = v.split(", ")
         if len(sets) > 3:
@@ -89,14 +89,29 @@ class MatchUpdate(BaseModel):
             # Ecart de 2 jeux minimum sauf si 7-6
             diff = abs(games_1 - games_2)
             if diff < 2 and not (games_1 == 7 and games_2 == 6) and not (games_1 == 6 and games_2 == 7):
-                 # Cas particulier : certains formats acceptent le point en or à 6-6 ? 
-                 # Mais ici la règle dit "Si un set se termine 7-6, c'est un tie-break"
-                 # Donc 6-5 n'est pas une fin de set valide.
                  raise ValueError("Il faut 2 jeux d'écart pour gagner un set (sauf tie-break 7-6)")
                  
             if max(games_1, games_2) > 7:
                  raise ValueError("Impossible d'avoir plus de 7 jeux dans un set")
 
+        # Vérifier qu'une équipe a gagné au moins 2 sets
+        sets_won_1 = 0
+        sets_won_2 = 0
+        
+        for i, s in enumerate(sets):
+            g1, g2 = map(int, s.split("-"))
+            if g1 > g2:
+                sets_won_1 += 1
+            elif g2 > g1:
+                sets_won_2 += 1
+            
+            # Si une équipe a déjà gagné 2 sets et qu'il reste des sets à jouer
+            if (sets_won_1 == 2 or sets_won_2 == 2) and i < len(sets) - 1:
+                 raise ValueError("Le match est déjà terminé après 2 sets gagnants")
+        
+        if sets_won_1 < 2 and sets_won_2 < 2:
+            raise ValueError("Il faut au moins 2 sets gagnants pour terminer un match")
+            
         return v
 
 class MatchResponse(BaseModel):

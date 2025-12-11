@@ -62,13 +62,13 @@ class PlayerResponse(PlayerBase):
 
 # --- Teams ---
 class TeamCreate(BaseModel):
-    company: str
+    name: str
     player1_id: int
     player2_id: int
 
 class TeamResponse(BaseModel):
     id: int
-    company: str
+    name: str
     players: List[PlayerResponse]
     pool_id: Optional[int] = None
     

@@ -134,13 +134,8 @@ describe('Admin Delete Protection', () => {
       cy.contains('Changement de mot de passe requis').should('be.visible')
 
       const newPassword = 'NewPassword123!'
-      // The modal inputs don't have name attributes in the code I read, just v-model.
-      // I'll use labels or order.
       cy.contains('Nouveau mot de passe').parent().find('input').type(newPassword)
       cy.contains('Confirmer le mot de passe').parent().find('input').type(newPassword)
-      // Check button text in LoginPage.vue: "Changer le mot de passe" or similar?
-      // I need to check LoginPage.vue again for the button text.
-      // It's inside the modal form.
       cy.get('form').last().find('button[type="submit"]').click()
 
       // Wait for login to complete (redirect to home)
@@ -390,7 +385,7 @@ describe('Admin Teams Management', () => {
     cy.contains('button', 'Équipes').click()
     cy.contains('Créer une équipe').click()
 
-    cy.get('input[placeholder="Entreprise"]').type('TeamCorp')
+    cy.get('input[placeholder="Nom d\'équipe"]').type('TeamCorp')
 
     // Select players - they should be in the dropdown now
     // The dropdown shows "Firstname Lastname (Company)"
@@ -447,25 +442,40 @@ describe('Admin Teams Validation', () => {
     // 3. Attendre que la modale soit visible
     cy.contains('h3', 'Créer une équipe').should('be.visible')
 
-    cy.get('input[placeholder="Entreprise"]').type('Equipe Test Invalid')
+    cy.get('input[placeholder="Nom d\'équipe"]').type('Equipe Test Invalid')
 
     // 4. Sélectionner le même joueur dans les deux listes
     cy.get('select').eq(0).find('option').eq(1).then($opt => {
       const val = $opt.val()
       if (val) {
         cy.get('select').eq(0).select(val)
-        cy.get('select').eq(1).select(val)
-
-        // Préparer l'interception de l'alerte JS
-        const stub = cy.stub()
-        cy.on('window:alert', stub)
-
-        // Tenter de créer
-        cy.contains('button', /^Créer$/).click()
-
-        cy.wrap(stub).should('be.called')
+        
+        // Verify that the option is NOT present in the second select
+        cy.get('select').eq(1).find(`option[value="${val}"]`).should('not.exist')
       } else {
         cy.log('No players available to test')
+      }
+    })
+  })
+
+  it('should filter players by company in team creation', () => {
+    cy.contains('button', 'Créer une équipe').click({ force: true })
+    
+    // Select a player
+    cy.get('select').eq(0).find('option').eq(1).then($opt => {
+      const text = $opt.text()
+      const companyMatch = text.match(/\((.*?)\)/)
+      const company = companyMatch ? companyMatch[1] : null
+      
+      if (company) {
+        cy.get('select').eq(0).select($opt.val())
+        
+        // Check that all options in second select have the same company
+        cy.get('select').eq(1).find('option').each(($el) => {
+          if ($el.val()) { // Skip placeholder
+            expect($el.text()).to.contain(`(${company})`)
+          }
+        })
       }
     })
   })

@@ -10,6 +10,8 @@ node_modules
 
 *.db
 *.jpg
+*.jpeg
+*.png
 backend/.coverage
 
 # Log files

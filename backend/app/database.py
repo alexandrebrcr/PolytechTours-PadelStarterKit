@@ -84,9 +84,9 @@ def init_db_test():
         p2 = db.query(Player).filter(Player.email == "jean@test.com").first()
         
         if p1 and p2:
-            team_a = db.query(Team).filter(Team.company == "CompA").first()
+            team_a = db.query(Team).filter(Team.name == "CompA").first()
             if not team_a:
-                team_a = Team(company="CompA")
+                team_a = Team(name="CompA")
                 db.add(team_a)
                 db.commit()
                 
@@ -99,9 +99,9 @@ def init_db_test():
         p4 = db.query(Player).filter(Player.email == "bob@test.com").first()
         
         if p3 and p4:
-            team_b = db.query(Team).filter(Team.company == "ResCompA").first()
+            team_b = db.query(Team).filter(Team.name == "ResCompA").first()
             if not team_b:
-                team_b = Team(company="ResCompA")
+                team_b = Team(name="ResCompA")
                 db.add(team_b)
                 db.commit()
                 

@@ -119,7 +119,7 @@
             <div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
               <!-- Team 1 -->
               <div class="text-center flex-1">
-                <div class="font-bold text-lg">{{ match.team1.company }}</div>
+                <div class="font-bold text-lg">{{ match.team1.name }}</div>
                 <div class="text-sm text-gray-600">
                   <div v-for="player in match.team1.players" :key="player.id">
                     {{ player.firstname }} {{ player.lastname }}
@@ -136,7 +136,7 @@
 
               <!-- Team 2 -->
               <div class="text-center flex-1">
-                <div class="font-bold text-lg">{{ match.team2.company }}</div>
+                <div class="font-bold text-lg">{{ match.team2.name }}</div>
                 <div class="text-sm text-gray-600">
                   <div v-for="player in match.team2.players" :key="player.id">
                     {{ player.firstname }} {{ player.lastname }}
@@ -226,7 +226,7 @@
                 :disabled="isEditing"
               >
                 <option v-for="team in teams" :key="team.id" :value="team.id">
-                  {{ team.company }}
+                  {{ team.name }}
                 </option>
               </select>
             </div>
@@ -239,7 +239,7 @@
                 :disabled="isEditing"
               >
                 <option v-for="team in teams" :key="team.id" :value="team.id">
-                  {{ team.company }}
+                  {{ team.name }}
                 </option>
               </select>
             </div>
@@ -259,7 +259,7 @@
             </div>
 
             <div v-if="form.status === 'TERMINE'" class="col-span-2">
-              <label class="block text-sm font-medium text-gray-700">Score (Vue Équipe 1)</label>
+              <label class="block text-sm font-medium text-gray-700">Score (Vue {{ currentTeam1Name }})</label>
               <input 
                 type="text" 
                 v-model="form.score_team1"
@@ -271,8 +271,23 @@
             </div>
           </div>
 
-          <div v-if="error" class="text-red-600 text-sm mt-2">
-            {{ error }}
+          <div v-if="uniqueErrors" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4" role="alert">
+            <strong class="font-bold">Erreur !</strong>
+            <div v-if="Array.isArray(uniqueErrors)">
+              <ul class="list-disc list-inside">
+                <li v-for="(err, index) in uniqueErrors" :key="index">
+                  {{ err }}
+                </li>
+              </ul>
+            </div>
+            <span v-else class="block sm:inline">{{ uniqueErrors }}</span>
+            <div v-if="uniqueErrors.toString().includes('Format de score invalide') || (Array.isArray(uniqueErrors) && uniqueErrors.some(e => e.includes('Format de score')))">
+              <p class="mt-2 font-semibold">Format attendu :</p>
+              <ul class="list-disc list-inside ml-2">
+                <li>X-Y, X-Y (ex: 6-4, 6-2)</li>
+                <li>X-Y, X-Y, X-Y (ex: 6-4, 4-6, 6-2)</li>
+              </ul>
+            </div>
           </div>
 
           <div class="flex justify-end gap-4 mt-6">
@@ -298,7 +313,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { matchesAPI, authAPI } from '../services/api'
 import { useAuthStore } from '../stores/auth'
 
@@ -309,6 +324,19 @@ const teams = ref([])
 const loading = ref(false)
 const error = ref(null)
 const submitting = ref(false)
+const currentTeam1Name = ref('')
+
+const uniqueErrors = computed(() => {
+  if (!error.value) return null
+  if (Array.isArray(error.value)) {
+    const messages = error.value.map(e => {
+        let msg = (typeof e === 'object' && e.msg) ? e.msg : e
+        return typeof msg === 'string' ? msg.replace('Value error, ', '') : msg
+    })
+    return [...new Set(messages)]
+  }
+  return typeof error.value === 'string' ? error.value.replace('Value error, ', '') : error.value
+})
 
 // Filters
 const filters = ref({
@@ -426,6 +454,7 @@ const openCreateModal = () => {
 const openEditModal = (match) => {
   isEditing.value = true
   currentMatchId.value = match.id
+  currentTeam1Name.value = match.team1.name
   form.value = {
     date: match.date,
     time: match.time.substring(0, 5), // HH:MM:SS -> HH:MM
@@ -484,13 +513,25 @@ const submitForm = async () => {
     if (!payload.score_team2) payload.score_team2 = null
 
     if (isEditing.value) {
-      delete payload.date
-      delete payload.time
-      delete payload.court_number
-      delete payload.team1_id
-      delete payload.team2_id
+      const originalMatch = matches.value.find(m => m.id === currentMatchId.value)
+      const changes = {}
+
+      if (form.value.date !== originalMatch.date) changes.date = form.value.date
       
-      await matchesAPI.updateMatch(currentMatchId.value, payload)
+      // Compare times (HH:MM)
+      const originalTime = originalMatch.time.substring(0, 5)
+      if (form.value.time !== originalTime) changes.time = form.value.time
+      
+      if (form.value.court_number !== originalMatch.court_number) changes.court_number = form.value.court_number
+      if (form.value.status !== originalMatch.status) changes.status = form.value.status
+      
+      // Scores
+      if (form.value.score_team1 !== (originalMatch.score_team1 || '')) changes.score_team1 = form.value.score_team1 || null
+      if (form.value.score_team2 !== (originalMatch.score_team2 || '')) changes.score_team2 = form.value.score_team2 || null
+
+      if (Object.keys(changes).length > 0) {
+        await matchesAPI.updateMatch(currentMatchId.value, changes)
+      }
     } else {
       await matchesAPI.createMatch(payload)
     }

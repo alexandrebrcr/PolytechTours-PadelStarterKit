@@ -94,7 +94,14 @@ def get_matches(
     # Filtrage Python pour 'company' si nécessaire car la query est complexe
     if company:
         company_lower = company.lower()
-        matches = [m for m in matches if company_lower in m.team1.company.lower() or company_lower in m.team2.company.lower()]
+        # On filtre sur le nom de l'équipe OU l'entreprise des joueurs
+        matches = [
+            m for m in matches 
+            if company_lower in m.team1.name.lower() 
+            or company_lower in m.team2.name.lower()
+            or any(company_lower in p.company.lower() for p in m.team1.players)
+            or any(company_lower in p.company.lower() for p in m.team2.players)
+        ]
 
     return [map_match_to_response(m) for m in matches]
 

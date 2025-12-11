@@ -127,13 +127,21 @@ def create_team(
     if not p1 or not p2:
         raise HTTPException(404, "Un ou plusieurs joueurs non trouvés")
         
-    if p1.company != team.company or p2.company != team.company:
-        raise HTTPException(400, "Les joueurs doivent appartenir à l'entreprise de l'équipe")
+    if p1.id == p2.id:
+        raise HTTPException(400, "Impossible de sélectionner deux fois le même joueur")
         
+    if p1.company != p2.company:
+        raise HTTPException(400, "Les deux joueurs doivent appartenir à la même entreprise")
+
     if p1.team_id or p2.team_id:
         raise HTTPException(400, "Un joueur ne peut appartenir qu'à une seule équipe")
         
-    db_team = Team(company=team.company)
+    # Vérifier si une équipe avec ce nom existe déjà
+    existing_team = db.query(Team).filter(Team.name == team.name).first()
+    if existing_team:
+        raise HTTPException(400, "Une équipe avec ce nom existe déjà")
+
+    db_team = Team(name=team.name)
     db.add(db_team)
     db.commit()
     
@@ -162,7 +170,8 @@ def delete_team(
     if not db_team:
         raise HTTPException(404, "Équipe non trouvée")
         
-    # TODO: Vérifier si des matchs ont été joués
+    if db_team.matches_as_team1 or db_team.matches_as_team2:
+        raise HTTPException(400, " Impossible de supprimer une équipe qui a déjà joué des matchs")
     
     # Libérer les joueurs
     for player in db_team.players:
@@ -191,7 +200,7 @@ def create_pool(
         
     for team in teams:
         if team.pool_id:
-            raise HTTPException(400, f"L'équipe {team.company} est déjà dans une poule")
+            raise HTTPException(400, f"L'équipe {team.name} est déjà dans une poule")
             
     db_pool = Pool(name=pool.name)
     db.add(db_pool)

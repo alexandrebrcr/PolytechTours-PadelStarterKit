@@ -25,6 +25,14 @@
       </div>
 
       <!-- Content -->
+      <div v-if="error" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <strong class="font-bold">Erreur !</strong>
+        <span class="block sm:inline">{{ error }}</span>
+        <span class="absolute top-0 bottom-0 right-0 px-4 py-3" @click="error = null">
+          <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+        </span>
+      </div>
+
       <div class="bg-white shadow rounded-lg p-6">
         
         <!-- Gestion des Joueurs -->
@@ -81,7 +89,7 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entreprise</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom d'équipe</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joueurs</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Poule</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -89,7 +97,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="team in teams" :key="team.id">
-                <td class="px-6 py-4 whitespace-nowrap">{{ team.company }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ team.name }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div v-for="p in team.players" :key="p.id">{{ p.firstname }} {{ p.lastname }}</div>
                 </td>
@@ -116,7 +124,7 @@
               <h3 class="font-bold text-lg mb-2">{{ pool.name }}</h3>
               <ul class="list-disc list-inside text-sm text-gray-600">
                 <li v-for="team in pool.teams" :key="team.id">
-                  {{ team.company }}
+                  {{ team.name }}
                 </li>
               </ul>
             </div>
@@ -151,18 +159,18 @@
       <div class="bg-white rounded-lg p-8 max-w-md w-full">
         <h3 class="text-lg font-medium mb-4">Créer une équipe</h3>
         <form @submit.prevent="saveTeam" class="space-y-4">
-          <input v-model="teamForm.company" placeholder="Entreprise" class="w-full border rounded p-2" required>
+          <input v-model="teamForm.name" placeholder="Nom d'équipe" class="w-full border rounded p-2" required>
           
-          <select v-model="teamForm.player1_id" class="w-full border rounded p-2" required>
+          <select v-model="teamForm.player1_id" class="w-full border rounded p-2" required @change="teamForm.player2_id = ''">
             <option value="">Sélectionner Joueur 1</option>
             <option v-for="p in availablePlayers" :key="p.id" :value="p.id">
               {{ p.firstname }} {{ p.lastname }} ({{ p.company }})
             </option>
           </select>
 
-          <select v-model="teamForm.player2_id" class="w-full border rounded p-2" required>
-            <option value="">Sélectionner Joueur 2</option>
-            <option v-for="p in availablePlayers" :key="p.id" :value="p.id">
+          <select v-model="teamForm.player2_id" class="w-full border rounded p-2" required :disabled="!teamForm.player1_id">
+            <option value="">Sélectionner Joueur 2 (Même entreprise)</option>
+            <option v-for="p in availablePlayersForTeam2" :key="p.id" :value="p.id">
               {{ p.firstname }} {{ p.lastname }} ({{ p.company }})
             </option>
           </select>
@@ -186,7 +194,7 @@
             <p class="text-sm text-gray-500">Sélectionnez exactement 6 équipes : {{ selectedTeams.length }}/6</p>
             <div v-for="team in availableTeams" :key="team.id" class="flex items-center">
               <input type="checkbox" :value="team.id" v-model="selectedTeams" :disabled="selectedTeams.length >= 6 && !selectedTeams.includes(team.id)">
-              <span class="ml-2">{{ team.company }}</span>
+              <span class="ml-2">{{ team.name }}</span>
             </div>
           </div>
 
@@ -221,6 +229,7 @@ import api from '../services/api'
 const router = useRouter()
 const authStore = useAuthStore()
 
+const error = ref(null)
 const currentTab = ref('players')
 const tabs = [
   { name: 'players', label: 'Joueurs' },
@@ -241,12 +250,18 @@ const newAccount = ref(null)
 // Forms
 const editingPlayer = ref(null)
 const playerForm = ref({ firstname: '', lastname: '', company: '', email: '', license_number: '' })
-const teamForm = ref({ company: '', player1_id: '', player2_id: '' })
+const teamForm = ref({ name: '', player1_id: '', player2_id: '' })
 const poolForm = ref({ name: '' })
 const selectedTeams = ref([])
 
 // Computed
 const availablePlayers = computed(() => players.value.filter(p => !p.team_id))
+const availablePlayersForTeam2 = computed(() => {
+  if (!teamForm.value.player1_id) return []
+  const p1 = players.value.find(p => p.id === teamForm.value.player1_id)
+  if (!p1) return []
+  return availablePlayers.value.filter(p => p.company === p1.company && p.id !== p1.id)
+})
 const availableTeams = computed(() => teams.value.filter(t => !t.pool_id))
 
 onMounted(() => {
@@ -345,11 +360,12 @@ async function changeRole(playerId, newRole) {
 
 // Teams
 function openTeamModal() {
-  teamForm.value = { company: '', player1_id: '', player2_id: '' }
+  teamForm.value = { name: '', player1_id: '', player2_id: '' }
   showTeamModal.value = true
 }
 
 async function saveTeam() {
+  error.value = null
   try {
     await api.post('/admin/teams', teamForm.value)
     showTeamModal.value = false
@@ -361,11 +377,12 @@ async function saveTeam() {
 
 async function deleteTeam(id) {
   if (!confirm("Supprimer cette équipe ?")) return
+  error.value = null
   try {
     await api.delete(`/admin/teams/${id}`)
     loadData()
   } catch (err) {
-    alert(err.response?.data?.detail || 'Erreur')
+    error.value = err.response?.data?.detail || 'Erreur'
   }
 }
 
