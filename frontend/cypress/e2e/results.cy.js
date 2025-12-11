@@ -4,7 +4,7 @@ describe('Results Management', () => {
   })
 
   it('should allow admin to enter match results', () => {
-    // Teams CompA and ResCompA are seeded
+    // Teams Dream Team and Equipe 42 are seeded
     
     // Create Match first
     cy.visit('/matchs')
@@ -14,8 +14,8 @@ describe('Results Management', () => {
       cy.get('input[type="date"]').type('2026-06-20')
       cy.get('input[type="time"]').type('10:00')
       cy.get('input[type="number"]').clear().type('2')
-      cy.get('select').eq(0).select('CompA')
-      cy.get('select').eq(1).select('ResCompA')
+      cy.get('select').eq(0).select('Dream Team')
+      cy.get('select').eq(1).select('Equipe 42')
       cy.contains('button', 'Enregistrer').click()
     })
 
@@ -25,7 +25,7 @@ describe('Results Management', () => {
 
     // 2. Enter Results
     // Maintenant le match est visible, on peut le trouver
-    cy.contains('CompA').parents('.border-l-4').within(() => {
+    cy.contains('Dream Team').parents('.border-l-4').within(() => {
       cy.get('button[title="Modifier"]').click()
     })
 
@@ -38,7 +38,7 @@ describe('Results Management', () => {
     })
 
     // 3. Verify Results
-    cy.contains('CompA').parents('.border-l-4').within(() => {
+    cy.contains('Dream Team').parents('.border-l-4').within(() => {
       cy.contains('6-4, 6-4').should('exist')
       cy.contains('Terminé').should('exist')
     })
@@ -47,7 +47,7 @@ describe('Results Management', () => {
   it('should display results in ranking', () => {
     cy.visit('/results')
     cy.contains('button', 'Classement Général').click()
-    cy.contains('td', 'CompA').should('exist')
+    cy.contains('td', 'Dream Team').should('exist')
   })
 
   it('should validate score format', () => {
@@ -59,8 +59,8 @@ describe('Results Management', () => {
       cy.get('input[type="date"]').type('2026-06-21')
       cy.get('input[type="time"]').type('10:00')
       cy.get('input[type="number"]').clear().type('3')
-      cy.get('select').eq(0).select('CompA')
-      cy.get('select').eq(1).select('ResCompA')
+      cy.get('select').eq(0).select('Dream Team')
+      cy.get('select').eq(1).select('Equipe 42')
       cy.contains('button', 'Enregistrer').click()
     })
     
@@ -101,8 +101,8 @@ describe('Ranking Logic', () => {
       cy.get('input[type="date"]').type('2026-11-20')
       cy.get('input[type="time"]').type('10:00')
       cy.get('input[type="number"]').clear().type('12')
-      cy.get('select').eq(0).select('CompA')
-      cy.get('select').eq(1).select('ResCompA')
+      cy.get('select').eq(0).select('Dream Team')
+      cy.get('select').eq(1).select('Equipe 42')
       cy.contains('button', 'Enregistrer').click()
     })
     
@@ -122,9 +122,9 @@ describe('Ranking Logic', () => {
     cy.visit('/results')
     cy.contains('button', 'Classement Général').click()
     
-    // CompA won, should have points.
-    // We verify that the row for CompA exists and has some points.
-    cy.contains('td', 'CompA').parent().find('td').eq(2).should('not.be.empty')
-    cy.contains('td', 'CompA').parent().find('td').eq(4).should('contain', '1') // Gagnés >= 1 (since we just won one)
+    // Dream Team won, should have points.
+    // We verify that the row for Dream Team exists and has some points.
+    cy.contains('td', 'Dream Team').parent().find('td').eq(2).should('not.be.empty')
+    cy.contains('td', 'Dream Team').parent().find('td').eq(4).should('contain', '1') // Gagnés >= 1 (since we just won one)
   })
 })

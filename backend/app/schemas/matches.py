@@ -12,6 +12,7 @@ class PlayerMatchInfo(BaseModel):
     id: int
     firstname: str
     lastname: str
+    company: str
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -19,8 +20,24 @@ class TeamMatchInfo(BaseModel):
     id: int
     name: str
     players: List[PlayerMatchInfo]
+    company: Optional[str] = None
     
     model_config = ConfigDict(from_attributes=True)
+
+    @field_validator('company', mode='before')
+    @classmethod
+    def get_company(cls, v, info: ValidationInfo):
+        # Si v est déjà défini, on le garde
+        if v:
+            return v
+        # Sinon on essaie de le récupérer depuis les joueurs
+        # Note: Lors de la sérialisation depuis l'ORM, 'players' n'est peut-être pas encore dans 'info.data'
+        # ou c'est l'objet ORM qui est passé.
+        return None
+
+    def model_post_init(self, __context):
+        if not self.company and self.players:
+            self.company = self.players[0].company
 
 class MatchCreate(BaseModel):
     date: date

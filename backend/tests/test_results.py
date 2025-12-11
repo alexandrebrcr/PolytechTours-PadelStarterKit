@@ -9,11 +9,26 @@ from app.models.models import Match, Team, Player, MatchStatus, Event
 @pytest.fixture
 def ranking_data(db_session):
     """Crée des données pour tester le classement"""
-    # Créer 3 équipes
-    t1 = Team(company="Company A")
-    t2 = Team(company="Company B")
-    t3 = Team(company="Company C")
-    db_session.add_all([t1, t2, t3])
+    # Créer 3 équipes avec des joueurs pour avoir l'entreprise
+    # Team 1 - Company A
+    p1 = Player(firstname="P1", lastname="A", company="Company A", email="p1@a.com", license_number="L001")
+    p2 = Player(firstname="P2", lastname="A", company="Company A", email="p2@a.com", license_number="L002")
+    t1 = Team(name="Team A")
+    t1.players = [p1, p2]
+
+    # Team 2 - Company B
+    p3 = Player(firstname="P3", lastname="B", company="Company B", email="p3@b.com", license_number="L003")
+    p4 = Player(firstname="P4", lastname="B", company="Company B", email="p4@b.com", license_number="L004")
+    t2 = Team(name="Team B")
+    t2.players = [p3, p4]
+
+    # Team 3 - Company C
+    p5 = Player(firstname="P5", lastname="C", company="Company C", email="p5@c.com", license_number="L005")
+    p6 = Player(firstname="P6", lastname="C", company="Company C", email="p6@c.com", license_number="L006")
+    t3 = Team(name="Team C")
+    t3.players = [p5, p6]
+
+    db_session.add_all([p1, p2, p3, p4, p5, p6, t1, t2, t3])
     db_session.commit()
     
     # Créer un événement

@@ -97,7 +97,12 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="team in teams" :key="team.id">
-                <td class="px-6 py-4 whitespace-nowrap">{{ team.name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  {{ team.name }}
+                  <span v-if="team.players && team.players.length > 0" class="text-gray-500 text-sm ml-1">
+                    ({{ team.players[0].company }})
+                  </span>
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div v-for="p in team.players" :key="p.id">{{ p.firstname }} {{ p.lastname }}</div>
                 </td>

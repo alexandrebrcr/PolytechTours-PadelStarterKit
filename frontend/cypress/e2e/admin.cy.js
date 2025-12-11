@@ -397,7 +397,10 @@ describe('Admin Teams Management', () => {
     cy.wait('@createTeam').its('response.statusCode').should('eq', 200)
 
     // Verify team in list
-    cy.contains('TeamCorp').should('be.visible')
+    cy.contains('tr', 'TeamCorp').within(() => {
+      cy.contains('TeamCorp').should('be.visible')
+      cy.contains('(TeamCorp)').should('be.visible')
+    })
     cy.contains('PlayerOne Test').should('be.visible')
     cy.contains('PlayerTwo Test').should('be.visible')
 

@@ -56,11 +56,11 @@
             <div class="flex-1 text-center">
               <div class="text-lg font-bold">
                 <span :class="isMyTeam(match.team1) ? 'text-blue-600' : 'text-gray-900'">
-                  {{ match.team1.company }}
+                  {{ match.team1.name }} <span class="text-sm font-normal text-gray-500">({{ match.team1.company }})</span>
                 </span>
                 <span class="mx-2 text-gray-400">vs</span>
                 <span :class="isMyTeam(match.team2) ? 'text-blue-600' : 'text-gray-900'">
-                  {{ match.team2.company }}
+                  {{ match.team2.name }} <span class="text-sm font-normal text-gray-500">({{ match.team2.company }})</span>
                 </span>
               </div>
               <div class="text-sm text-gray-500 mt-1">
@@ -85,7 +85,7 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pos</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entreprise</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Équipe (Entreprise)</th>
               <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Joués</th>
               <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">V</th>
               <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">D</th>
@@ -94,12 +94,13 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <tr v-for="row in ranking" :key="row.company" class="hover:bg-gray-50">
+            <tr v-for="row in ranking" :key="row.team_name" class="hover:bg-gray-50">
               <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900">
                 {{ row.position }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-gray-900">
-                {{ row.company }}
+                <span class="font-medium">{{ row.team_name }}</span>
+                <span class="text-gray-500 ml-2">({{ row.company }})</span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-center text-gray-500">
                 {{ row.matches_played }}
