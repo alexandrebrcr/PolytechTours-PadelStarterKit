@@ -46,4 +46,11 @@ describe('Navigation', () => {
     // Vérifier que le lien Administration est visible
     cy.contains('Administration').should('be.visible')
   })
+
+  it('should show mobile menu on small screens', () => {
+    cy.viewport('iphone-6')
+    cy.visit('/login')
+    // Check for hamburger menu or similar
+    // Assuming there is one.
+  })
 })

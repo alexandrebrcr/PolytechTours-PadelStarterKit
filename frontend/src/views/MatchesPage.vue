@@ -125,12 +125,14 @@
                     {{ player.firstname }} {{ player.lastname }}
                   </div>
                 </div>
-                <div v-if="match.status === 'TERMINE'" class="text-2xl font-bold mt-2 text-blue-600">
+              </div>
+
+              <div class="flex flex-col items-center">
+                <div class="text-gray-400 font-bold text-xl">VS</div>
+                <div v-if="match.status === 'TERMINE'" class="text-xl font-bold mt-1 text-blue-600">
                   {{ match.score_team1 }}
                 </div>
               </div>
-
-              <div class="text-gray-400 font-bold text-xl">VS</div>
 
               <!-- Team 2 -->
               <div class="text-center flex-1">
@@ -139,9 +141,6 @@
                   <div v-for="player in match.team2.players" :key="player.id">
                     {{ player.firstname }} {{ player.lastname }}
                   </div>
-                </div>
-                <div v-if="match.status === 'TERMINE'" class="text-2xl font-bold mt-2 text-blue-600">
-                  {{ match.score_team2 }}
                 </div>
               </div>
             </div>
@@ -259,25 +258,16 @@
               </select>
             </div>
 
-            <div v-if="form.status === 'TERMINE'" class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Score Équipe 1</label>
-                <input 
-                  type="text" 
-                  v-model="form.score_team1"
-                  placeholder="ex: 6-4 6-2"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Score Équipe 2</label>
-                <input 
-                  type="text" 
-                  v-model="form.score_team2"
-                  placeholder="ex: 4-6 2-6"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-              </div>
+            <div v-if="form.status === 'TERMINE'" class="col-span-2">
+              <label class="block text-sm font-medium text-gray-700">Score (Vue Équipe 1)</label>
+              <input 
+                type="text" 
+                v-model="form.score_team1"
+                placeholder="Ex: 6-4, 6-2"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                @input="updateScoreTeam2"
+              >
+              <p class="text-xs text-gray-500 mt-1">Le score de l'équipe 2 sera calculé automatiquement : {{ form.score_team2 }}</p>
             </div>
           </div>
 
@@ -455,6 +445,29 @@ const closeModal = () => {
   showModal.value = false
 }
 
+const updateScoreTeam2 = () => {
+  if (!form.value.score_team1) {
+    form.value.score_team2 = ''
+    return
+  }
+  
+  try {
+    // Invert score logic
+    // "6-4, 6-2" -> "4-6, 2-6"
+    const sets = form.value.score_team1.split(',').map(s => s.trim())
+    const invertedSets = sets.map(set => {
+      const parts = set.split('-')
+      if (parts.length === 2) {
+        return `${parts[1]}-${parts[0]}`
+      }
+      return set
+    })
+    form.value.score_team2 = invertedSets.join(', ')
+  } catch (e) {
+    // Ignore errors during typing
+  }
+}
+
 const submitForm = async () => {
   submitting.value = true
   error.value = null
@@ -464,13 +477,13 @@ const submitForm = async () => {
       throw new Error("Les deux équipes doivent être différentes")
     }
 
-    // On crée une copie des données du formulaire
     const payload = { ...form.value }
 
+    // Si les scores sont vides, on envoie null pour que Pydantic accepte
+    if (!payload.score_team1) payload.score_team1 = null
+    if (!payload.score_team2) payload.score_team2 = null
+
     if (isEditing.value) {
-      // Si on est en mode édition, l'API (Pydantic) semble rejeter la date/heure 
-      // si elles sont renvoyées alors qu'elles ne changent pas (erreur "none_required").
-      // On supprime ces champs du payload pour ne pas bloquer la requête.
       delete payload.date
       delete payload.time
       delete payload.court_number

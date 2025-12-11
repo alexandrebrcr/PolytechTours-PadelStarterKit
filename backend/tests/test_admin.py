@@ -1,3 +1,7 @@
+# ============================================
+# FICHIER : backend/tests/test_admin.py
+# ============================================
+
 import pytest
 from fastapi import status
 from app.models.models import Player, Team, Pool, User

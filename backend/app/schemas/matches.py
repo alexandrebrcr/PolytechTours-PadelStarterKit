@@ -57,12 +57,9 @@ class MatchUpdate(BaseModel):
     @field_validator('score_team1', 'score_team2')
     @classmethod
     def validate_score(cls, v):
-        if v is None or v == "":
+        if v is None or (isinstance(v, str) and v.strip() == ""):
             return None
         
-        # Format "X-Y, X-Y" ou "X-Y, X-Y, X-Y"
-        # Regex pour un set : \d+-\d+
-        # Regex complet : ^\d+-\d+(, \d+-\d+){1,2}$
         if not re.match(r"^\d+-\d+(, \d+-\d+){1,2}$", v):
             raise ValueError("Format de score invalide. Attendu : 'X-Y, X-Y' (ex: 6-4, 6-3)")
         

@@ -23,8 +23,6 @@ describe('Authentification', () => {
 
     // Vérifier la redirection vers la page d'accueil
     cy.url().should('eq', 'http://localhost:5173/')
-    // Bonjour a été retiré, on affiche directement l'identifiant
-    // Comme on a mis "Admin System" dans init_db, on doit voir ça
     cy.contains('Admin System').should('be.visible')
   })
 
@@ -158,8 +156,6 @@ describe('Authentification', () => {
 
       // 4. Changer le mot de passe
       const newPass = 'NewPass123!@#'
-      // Le premier input password est celui du login (caché par la modale mais présent), 
-      // les suivants sont dans la modale
       cy.get('input[type="password"]').eq(1).type(newPass) // Nouveau mdp
       cy.get('input[type="password"]').eq(2).type(newPass) // Confirm
       cy.contains('button', 'Changer le mot de passe').click()
@@ -178,5 +174,113 @@ describe('Authentification', () => {
     cy.contains('contact.support@padel.com').should('be.visible')
     cy.contains('button', 'Fermer').click()
     cy.contains('Veuillez contacter votre administrateur local').should('not.exist')
+  })
+})
+
+describe('Auth Redirects', () => {
+  beforeEach(() => {
+    cy.login('admin@padel.com', 'Test@2025_2026')
+  })
+
+  it('should logout from profile page', () => {
+    cy.visit('/profile')
+    cy.contains('Déconnexion').click()
+    cy.url().should('include', '/login')
+  })
+
+  it('should logout from admin page', () => {
+    cy.visit('/admin')
+    cy.contains('Déconnexion').click()
+    cy.url().should('include', '/login')
+  })
+
+  it('should redirect to home if logged in and visiting login', () => {
+    cy.visit('/login')
+    cy.url().should('eq', 'http://localhost:5173/')
+  })
+})
+
+describe('User Permissions', () => {
+  // On déclare les variables ici pour qu'elles soient accessibles dans les tests
+  let userEmail
+  let uniqueLastname
+  let tempPassword
+  // Le mot de passe définitif qu'on voudra donner
+  const userPass = 'UserPass123!'
+
+  beforeEach(() => {
+    const timestamp = Date.now()
+    const randomLetters = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5)
+    uniqueLastname = `User${randomLetters}`
+    userEmail = `user${timestamp}@test.com`
+
+    // 1. Connexion Admin
+    cy.login('admin@padel.com', 'Test@2025_2026')
+    cy.visit('/admin')
+
+    // Force click pour éviter l'erreur de "covering"
+    cy.contains('button', 'Joueurs').click({ force: true })
+
+    // 2. Création du joueur
+    cy.contains('Ajouter un joueur').click()
+    cy.get('input[placeholder="Prénom"]').type('Regular')
+    cy.get('input[placeholder="Nom"]').type(uniqueLastname)
+    cy.get('input[placeholder="Entreprise"]').type('Test Corp')
+    cy.get('input[type="email"]').type(userEmail)
+    cy.get('input[placeholder="N° Licence (LXXXXXX)"]').type(`L${timestamp.toString().slice(-6)}`)
+    cy.contains('button', 'Enregistrer').click()
+    cy.contains('h3', 'Ajouter un joueur').should('not.exist')
+
+    // 3. Création du compte et récupération du mot de passe temporaire
+    cy.contains('tr', uniqueLastname).contains('Créer compte').click()
+
+    cy.get('.bg-yellow-100').invoke('text').then((text) => {
+      tempPassword = text.trim() // On stocke le mdp temporaire
+      cy.contains('Fermer').click()
+      cy.contains('Déconnexion').click()
+    })
+  })
+
+  it('should setup regular user password', () => {
+    // Ici, tempPassword est disponible car rempli dans le beforeEach
+    cy.visit('/login')
+    cy.get('input[type="email"]').type(userEmail)
+    cy.get('input[type="password"]').type(tempPassword)
+    cy.get('button[type="submit"]').click()
+
+    // Vérifier la demande de changement
+    cy.contains('Changement de mot de passe requis').should('be.visible')
+
+    // Changer le mot de passe
+    cy.get('input[type="password"]').eq(1).type(userPass)
+    cy.get('input[type="password"]').eq(2).type(userPass)
+    cy.contains('button', 'Changer le mot de passe').click()
+
+    cy.url().should('eq', 'http://localhost:5173/')
+  })
+
+  context('As Regular User', () => {
+
+    beforeEach(() => {
+      // 1. Première connexion avec mdp temporaire
+      cy.visit('/login')
+      cy.get('input[type="email"]').type(userEmail)
+      cy.get('input[type="password"]').type(tempPassword)
+      cy.get('button[type="submit"]').click()
+
+      // 2. Changement de mot de passe OBLIGATOIRE pour accéder au compte
+      cy.contains('Changement de mot de passe requis').should('be.visible')
+      cy.get('input[type="password"]').eq(1).type(userPass)
+      cy.get('input[type="password"]').eq(2).type(userPass)
+      cy.contains('button', 'Changer le mot de passe').click()
+
+      // On est maintenant connecté et redirigé vers l'accueil
+      cy.url().should('eq', 'http://localhost:5173/')
+    })
+
+    it('should not see Administration link', () => {
+      // Le test réel commence ici : l'utilisateur est connecté et configuré
+      cy.contains('Administration').should('not.exist')
+    })
   })
 })

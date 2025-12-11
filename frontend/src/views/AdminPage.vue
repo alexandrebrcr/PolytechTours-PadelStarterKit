@@ -132,8 +132,8 @@
       <div class="bg-white rounded-lg p-8 max-w-md w-full">
         <h3 class="text-lg font-medium mb-4">{{ editingPlayer ? 'Modifier' : 'Ajouter' }} un joueur</h3>
         <form @submit.prevent="savePlayer" class="space-y-4">
-          <input v-model="playerForm.firstname" placeholder="Prénom" class="w-full border rounded p-2" required pattern="[a-zA-Z\s]+">
-          <input v-model="playerForm.lastname" placeholder="Nom" class="w-full border rounded p-2" required pattern="[a-zA-Z\s]+">
+          <input v-model="playerForm.firstname" placeholder="Prénom" class="w-full border rounded p-2" required pattern="[a-zA-Z\s\-_']+" title="Lettres, espaces, tirets, underscores et apostrophes">
+          <input v-model="playerForm.lastname" placeholder="Nom" class="w-full border rounded p-2" required pattern="[a-zA-Z\s\-_\.']+" title="Lettres, espaces, tirets, underscores, points et apostrophes">
           <input v-model="playerForm.company" placeholder="Entreprise" class="w-full border rounded p-2" required>
           <input v-model="playerForm.email" type="email" placeholder="Email" class="w-full border rounded p-2" required :disabled="!!editingPlayer">
           <input v-model="playerForm.license_number" placeholder="N° Licence (LXXXXXX)" class="w-full border rounded p-2" required pattern="L\d{6}" :disabled="!!editingPlayer">

@@ -68,7 +68,8 @@
                   v-model="profileForm.firstname" 
                   type="text" 
                   required
-                  pattern="[a-zA-Z\s\-\']+"
+                  pattern="[a-zA-Z\s\-_']+"
+                  title="Lettres, espaces, tirets, underscores et apostrophes"
                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
               </div>
@@ -78,7 +79,8 @@
                   v-model="profileForm.lastname" 
                   type="text" 
                   required
-                  pattern="[a-zA-Z\s\-\']+"
+                  pattern="[a-zA-Z\s\-_\.']+"
+                  title="Lettres, espaces, tirets, underscores, points et apostrophes"
                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
               </div>
