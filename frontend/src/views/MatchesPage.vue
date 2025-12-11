@@ -313,6 +313,7 @@ import { matchesAPI, authAPI } from '../services/api'
 import { useAuthStore } from '../stores/auth'
 
 const authStore = useAuthStore()
+console.log('MatchesPage mounted, isAdmin:', authStore.isAdmin)
 const matches = ref([])
 const teams = ref([])
 const loading = ref(false)
@@ -378,6 +379,13 @@ const fetchTeams = async () => {
 watch(filters, () => {
   fetchMatches()
 }, { deep: true })
+
+// Watch admin status
+watch(() => authStore.isAdmin, (newVal) => {
+  if (newVal) {
+    fetchTeams()
+  }
+})
 
 onMounted(() => {
   fetchMatches()

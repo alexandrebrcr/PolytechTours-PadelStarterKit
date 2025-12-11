@@ -227,9 +227,11 @@ def delete_match(
     # On devrait supprimer l'Event si c'est du 1-1.
     event_id = match.event_id
     db.delete(match)
-    # Vérifier s'il reste des matchs pour cet event (si jamais on a changé la logique)
-    # Si 1-1, on supprime l'event.
-    other_matches = db.query(Match).filter(Match.event_id == event_id).count()
+    
+    # Vérifier s'il reste des matchs pour cet event
+    # On exclut le match qu'on vient de supprimer (au cas où le flush n'est pas fait)
+    other_matches = db.query(Match).filter(Match.event_id == event_id, Match.id != match_id).count()
+    
     if other_matches == 0:
         event = db.query(Event).filter(Event.id == event_id).first()
         if event:

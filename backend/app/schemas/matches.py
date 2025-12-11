@@ -57,8 +57,8 @@ class MatchUpdate(BaseModel):
     @field_validator('score_team1', 'score_team2')
     @classmethod
     def validate_score(cls, v):
-        if v is None:
-            return v
+        if v is None or v == "":
+            return None
         
         # Format "X-Y, X-Y" ou "X-Y, X-Y, X-Y"
         # Regex pour un set : \d+-\d+
