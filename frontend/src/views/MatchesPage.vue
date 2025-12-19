@@ -537,34 +537,52 @@ const submitForm = async () => {
       throw new Error("Les deux équipes doivent être différentes")
     }
 
-    const payload = { ...form.value }
+    // 1. Validation Frontend : Score obligatoire si Terminé
+    if (form.value.status === 'TERMINE') {
+      if (!form.value.score_team1 || !form.value.score_team2) {
+        throw new Error("Veuillez saisir les scores pour terminer le match")
+      }
+    }
 
-    // Si les scores sont vides, on envoie null pour que Pydantic accepte
-    if (!payload.score_team1) payload.score_team1 = null
-    if (!payload.score_team2) payload.score_team2 = null
+    // Préparation du payload
+    const payload = {}
 
     if (isEditing.value) {
       const originalMatch = matches.value.find(m => m.id === currentMatchId.value)
-      const changes = {}
-
-      if (form.value.date !== originalMatch.date) changes.date = form.value.date
       
-      // Compare times (HH:MM)
+      // Logique de Diff : On n'ajoute QUE ce qui a changé
+      if (form.value.date !== originalMatch.date) payload.date = form.value.date
+      
+      // Comparaison Heure (HH:MM vs HH:MM:SS)
       const originalTime = originalMatch.time.substring(0, 5)
-      if (form.value.time !== originalTime) changes.time = form.value.time
+      if (form.value.time !== originalTime) payload.time = form.value.time
       
-      if (form.value.court_number !== originalMatch.court_number) changes.court_number = form.value.court_number
-      if (form.value.status !== originalMatch.status) changes.status = form.value.status
+      if (form.value.court_number !== originalMatch.court_number) payload.court_number = form.value.court_number
+      if (form.value.status !== originalMatch.status) payload.status = form.value.status
       
-      // Scores
-      if (form.value.score_team1 !== (originalMatch.score_team1 || '')) changes.score_team1 = form.value.score_team1 || null
-      if (form.value.score_team2 !== (originalMatch.score_team2 || '')) changes.score_team2 = form.value.score_team2 || null
+      // Gestion des Scores
+      if (form.value.status === 'A_VENIR' || form.value.status === 'ANNULE') {
+        // Si on annule ou remet à venir, on force la suppression des scores
+        // On l'envoie explicitement pour que le backend le prenne en compte (bien que le backend le force aussi maintenant)
+        payload.score_team1 = null
+        payload.score_team2 = null
+      } else {
+        // Sinon, on envoie les scores s'ils ont changé
+        if (form.value.score_team1 !== (originalMatch.score_team1 || '')) payload.score_team1 = form.value.score_team1
+        if (form.value.score_team2 !== (originalMatch.score_team2 || '')) payload.score_team2 = form.value.score_team2
+      }
 
-      if (Object.keys(changes).length > 0) {
-        await matchesAPI.updateMatch(currentMatchId.value, changes)
+      // Si le payload est vide, on ne fait rien
+      if (Object.keys(payload).length > 0) {
+        await matchesAPI.updateMatch(currentMatchId.value, payload)
       }
     } else {
-      await matchesAPI.createMatch(payload)
+      // En création
+      const createPayload = { ...form.value }
+      // Nettoyage des scores vides en création
+      if (!createPayload.score_team1) createPayload.score_team1 = null
+      if (!createPayload.score_team2) createPayload.score_team2 = null
+      await matchesAPI.createMatch(createPayload)
     }
     
     closeModal()

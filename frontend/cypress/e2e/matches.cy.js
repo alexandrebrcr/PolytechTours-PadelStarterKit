@@ -286,3 +286,76 @@ describe('Match Filters', () => {
     cy.get('input[type="date"]').eq(0).should('have.value', today)
   })
 })
+
+describe('Matches Logic & Validation', () => {
+  beforeEach(() => {
+    cy.login('admin@padel.com', 'Test@2025_2026')
+    cy.visit('/matches')
+  })
+
+  it('should validate scores logic on update', () => {
+    // 1. Créer un match de test
+    cy.contains('Ajouter un match').click()
+    cy.get('.fixed.z-50').within(() => {
+        cy.get('input[type="date"]').type(new Date().toISOString().split('T')[0])
+        cy.get('input[type="time"]').type('10:00')
+        cy.get('input[type="number"]').clear().type('5')
+        cy.get('select').eq(0).find('option').eq(0).then(opt => cy.get('select').eq(0).select(opt.val()))
+        cy.get('select').eq(1).find('option').eq(1).then(opt => cy.get('select').eq(1).select(opt.val()))
+        cy.contains('button', 'Enregistrer').click()
+    })
+    cy.get('.fixed.z-50').should('not.exist')
+    cy.contains('Piste 5').should('be.visible')
+
+    // 2. Tenter de passer en TERMINÉ sans score -> Doit échouer (Validation Frontend)
+    cy.get('button[title="Modifier"]').first().click()
+    cy.get('.fixed.z-50').within(() => {
+        cy.get('select').last().select('Terminé')
+        // On efface les scores au cas où
+        cy.get('input[placeholder="Ex: 6-4, 6-2"]').clear()
+        
+        // On force le clic car le bouton pourrait ne pas être disabled mais déclencher une erreur
+        cy.contains('button', 'Enregistrer').click()
+        
+        // Vérifier l'erreur frontend
+        cy.contains("Veuillez saisir les scores pour terminer le match").should('be.visible')
+    })
+
+    // 3. Ajouter les scores et valider -> Doit réussir
+    cy.get('.fixed.z-50').within(() => {
+        cy.get('input[placeholder="Ex: 6-4, 6-2"]').type('6-0, 6-0')
+        cy.contains('button', 'Enregistrer').click()
+    })
+    cy.get('.fixed.z-50').should('not.exist')
+    cy.contains('6-0, 6-0').should('be.visible')
+
+    // 4. Passer en ANNULÉ -> Les scores doivent disparaître
+    cy.get('button[title="Modifier"]').first().click()
+    cy.get('.fixed.z-50').within(() => {
+        // Vérifier que les scores sont là
+        cy.get('input[placeholder="Ex: 6-4, 6-2"]').should('have.value', '6-0, 6-0')
+        
+        // Changer statut
+        cy.get('select').last().select('Annulé')
+        cy.contains('button', 'Enregistrer').click()
+    })
+    
+    // Vérifier suppression visuelle
+    cy.get('.fixed.z-50').should('not.exist')
+    cy.contains('Annulé').should('be.visible')
+    cy.contains('6-0, 6-0').should('not.exist')
+
+    // 5. Modifier SEULEMENT l'heure (Test "Input should be none")
+    cy.get('button[title="Modifier"]').first().click()
+    cy.get('.fixed.z-50').within(() => {
+        // On remet à venir pour pouvoir éditer l'heure proprement
+        cy.get('select').last().select('À venir')
+        cy.get('input[type="time"]').type('18:00')
+        cy.contains('button', 'Enregistrer').click()
+    })
+    
+    // Si ça plante ici avec "Input should be none", c'est que le fix frontend payload n'a pas marché
+    cy.get('.fixed.z-50').should('not.exist')
+    cy.contains('18:00').should('be.visible')
+  })
+})

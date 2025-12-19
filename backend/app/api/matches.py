@@ -1,3 +1,7 @@
+# ============================================
+# FICHIER : backend/app/api/matches.py
+# ============================================
+
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
@@ -202,11 +206,29 @@ def update_match(
     if match_in.status:
         match.status = match_in.status
         
-    # Scores
-    if match_in.score_team1 is not None:
-        match.score_team1 = match_in.score_team1
-    if match_in.score_team2 is not None:
-        match.score_team2 = match_in.score_team2
+        # Si le statut passe à TERMINE, on vérifie que les scores sont présents
+        if match.status == MatchStatus.TERMINE:
+            # On vérifie soit dans match_in (nouveau score), soit dans match (score existant)
+            s1 = match_in.score_team1 if match_in.score_team1 is not None else match.score_team1
+            s2 = match_in.score_team2 if match_in.score_team2 is not None else match.score_team2
+            
+            if not s1 or not s2:
+                raise HTTPException(400, "Impossible de terminer un match sans scores")
+        
+        # Si le statut n'est pas TERMINE, on efface les scores
+        if match.status != MatchStatus.TERMINE:
+            match.score_team1 = None
+            match.score_team2 = None
+            # On ignore les scores envoyés dans match_in si le statut n'est pas TERMINE
+            match_in.score_team1 = None
+            match_in.score_team2 = None
+
+    # Scores (seulement si TERMINE)
+    if match.status == MatchStatus.TERMINE:
+        if match_in.score_team1 is not None:
+            match.score_team1 = match_in.score_team1
+        if match_in.score_team2 is not None:
+            match.score_team2 = match_in.score_team2
         
     db.commit()
     db.refresh(match)

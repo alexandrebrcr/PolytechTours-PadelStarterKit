@@ -71,7 +71,7 @@ sleep 5
 # Run Pytest
 echo "Running Pytest Tests..."
 cd backend
-#pytest
+pytest
 cd ..
 EXIT_CODE=$?
 
@@ -79,7 +79,7 @@ EXIT_CODE=$?
 echo "Running Cypress Tests..."
 cd frontend
 # Run specific test
-npx cypress run --spec "cypress/e2e/matches.cy.js"
+npx cypress run #--spec "cypress/e2e/matches.cy.js"
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -eq 0 ]; then

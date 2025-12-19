@@ -2,9 +2,9 @@
 # FICHIER : backend/app/schemas/matches.py
 # ============================================
 
-from pydantic import BaseModel, Field, field_validator, ValidationInfo, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ValidationInfo, ConfigDict, model_validator
 from typing import Optional, List
-from datetime import date, time
+from datetime import date as date_type, time as time_type
 from enum import Enum
 
 class MatchStatus(str, Enum):
@@ -44,8 +44,8 @@ class TeamMatchInfo(BaseModel):
             self.company = self.players[0].company
 
 class MatchCreate(BaseModel):
-    date: date
-    time: time
+    date: date_type
+    time: time_type
     court_number: int = Field(..., ge=1, le=10)
     team1_id: int
     team2_id: int
@@ -68,8 +68,8 @@ class MatchCreate(BaseModel):
 import re
 
 class MatchUpdate(BaseModel):
-    date: Optional[date] = None
-    time: Optional[time] = None
+    date: Optional[date_type] = None
+    time: Optional[time_type] = None
     court_number: Optional[int] = Field(None, ge=1, le=10)
     status: Optional[MatchStatus] = None
     score_team1: Optional[str] = None
@@ -138,6 +138,8 @@ class MatchUpdate(BaseModel):
     @field_validator('date')
     @classmethod
     def validate_date(cls, v):
+        if v is None:
+            return v
         from datetime import date
         if v < date.today():
             raise ValueError("La date ne peut pas être dans le passé")
@@ -145,8 +147,8 @@ class MatchUpdate(BaseModel):
 
 class MatchResponse(BaseModel):
     id: int
-    date: date
-    time: time
+    date: date_type
+    time: time_type
     court_number: int
     status: MatchStatus
     score_team1: Optional[str] = None
