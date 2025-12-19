@@ -36,12 +36,13 @@
         <template v-if="authStore.isAdmin">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Entreprise</label>
-            <input 
-              type="text" 
+            <select 
               v-model="filters.company"
-              placeholder="Rechercher..."
               class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             >
+              <option value="">Toutes</option>
+              <option v-for="c in companies" :key="c" :value="c">{{ c }}</option>
+            </select>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
@@ -321,6 +322,7 @@ const authStore = useAuthStore()
 console.log('MatchesPage mounted, isAdmin:', authStore.isAdmin)
 const matches = ref([])
 const teams = ref([])
+const players = ref([])
 const loading = ref(false)
 const error = ref(null)
 const submitting = ref(false)
@@ -336,6 +338,21 @@ const uniqueErrors = computed(() => {
     return [...new Set(messages)]
   }
   return typeof error.value === 'string' ? error.value.replace('Value error, ', '') : error.value
+})
+
+const companies = computed(() => {
+  const s = new Set()
+  // From teams
+  teams.value.forEach(t => {
+    t.players.forEach(p => {
+      if (p.company) s.add(p.company)
+    })
+  })
+  // From all players (if fetched)
+  players.value.forEach(p => {
+    if (p.company) s.add(p.company)
+  })
+  return Array.from(s).sort()
 })
 
 // Filters
@@ -393,6 +410,18 @@ const fetchTeams = async () => {
   }
 }
 
+// Fetch players (for admin companies list)
+const fetchPlayers = async () => {
+  if (authStore.isAdmin && players.value.length === 0) {
+    try {
+      const response = await authAPI.getPlayers()
+      players.value = response.data
+    } catch (err) {
+      console.error('Erreur chargement joueurs:', err)
+    }
+  }
+}
+
 // Watch filters
 watch(filters, () => {
   fetchMatches()
@@ -402,12 +431,14 @@ watch(filters, () => {
 watch(() => authStore.isAdmin, (newVal) => {
   if (newVal) {
     fetchTeams()
+    fetchPlayers()
   }
 })
 
 onMounted(() => {
   fetchMatches()
   fetchTeams()
+  fetchPlayers()
 })
 
 // Formatters

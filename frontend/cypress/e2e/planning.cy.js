@@ -154,11 +154,11 @@ describe('Planning Navigation', () => {
 
   it('should display current month', () => {
     const date = new Date()
-    const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
-    const currentMonth = monthNames[date.getMonth()]
+    const currentMonth = new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(date)
     const currentYear = date.getFullYear()
     
-    cy.get('h2').should('contain', currentMonth)
+    // Use regex for case-insensitive match because of CSS capitalization
+    cy.get('h2').invoke('text').should('match', new RegExp(currentMonth, 'i'))
     cy.get('h2').should('contain', currentYear)
   })
 

@@ -60,16 +60,15 @@
 
         <div class="p-6">
           <!-- Profile Form -->
-          <form v-if="currentTab === 'profile'" @submit.prevent="handleUpdateProfile" class="space-y-6">
+          <form v-if="currentTab === 'profile'" @submit.prevent="handleUpdateProfile" class="space-y-6" novalidate>
             <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
               <div>
                 <label class="block text-sm font-medium text-gray-700">Prénom</label>
                 <input 
                   v-model="profileForm.firstname" 
                   type="text" 
+                  name="firstname"
                   required
-                  pattern="[a-zA-Z\s\-_']+"
-                  title="Lettres, espaces, tirets, underscores et apostrophes"
                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
               </div>
@@ -78,9 +77,8 @@
                 <input 
                   v-model="profileForm.lastname" 
                   type="text" 
+                  name="lastname"
                   required
-                  pattern="[a-zA-Z\s\-_\.']+"
-                  title="Lettres, espaces, tirets, underscores, points et apostrophes"
                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
               </div>
@@ -89,6 +87,7 @@
                 <input 
                   v-model="profileForm.email" 
                   type="email" 
+                  name="email"
                   required
                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
@@ -98,6 +97,7 @@
                 <input 
                   v-model="profileForm.birthdate" 
                   type="date" 
+                  name="birthdate"
                   required
                   :max="maxDate"
                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -179,6 +179,15 @@
       </div>
 
     </div>
+
+    <!-- Error Modal -->
+    <div v-if="showErrorModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-8 max-w-md w-full text-center">
+        <h3 class="text-lg font-bold text-red-600 mb-4">Erreur</h3>
+        <p class="mb-6 text-gray-700">{{ errorMessage }}</p>
+        <button @click="showErrorModal = false" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Fermer</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -190,6 +199,13 @@ const authStore = useAuthStore()
 const fileInput = ref(null)
 const currentTab = ref('profile')
 const message = ref({ type: '', text: '' })
+const showErrorModal = ref(false)
+const errorMessage = ref('')
+
+function showError(msg) {
+  errorMessage.value = msg
+  showErrorModal.value = true
+}
 
 const tabs = [
   { name: 'profile', label: 'Informations personnelles' },
@@ -286,11 +302,62 @@ async function handleDeleteAvatar() {
 }
 
 async function handleUpdateProfile() {
+  // Validation manuelle
+  const nameRegex = /^[a-zA-Z\s\-_']+$/
+  const lastnameRegex = /^[a-zA-Z\s\-_\.']+$/
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  
+  if (!nameRegex.test(profileForm.value.firstname)) {
+    showError("Le prénom contient des caractères invalides (Lettres, espaces, tirets, underscores, points et apostrophes autorisés)")
+    return
+  }
+  if (profileForm.value.firstname.length < 2 || profileForm.value.firstname.length > 50) {
+    showError("Le prénom doit faire entre 2 et 50 caractères")
+    return
+  }
+
+  if (!lastnameRegex.test(profileForm.value.lastname)) {
+    showError("Le nom contient des caractères invalides (Lettres, espaces, tirets, underscores, points et apostrophes autorisés)")
+    return
+  }
+  if (profileForm.value.lastname.length < 2 || profileForm.value.lastname.length > 50) {
+    showError("Le nom doit faire entre 2 et 50 caractères")
+    return
+  }
+
+  if (!emailRegex.test(profileForm.value.email)) {
+    showError("Format d'email invalide")
+    return
+  }
+
+  if (profileForm.value.birthdate) {
+    const birthdate = new Date(profileForm.value.birthdate)
+    const today = new Date()
+    const minAgeDate = new Date()
+    minAgeDate.setFullYear(today.getFullYear() - 16)
+
+    // Reset hours for accurate date comparison
+    today.setHours(0, 0, 0, 0)
+    birthdate.setHours(0, 0, 0, 0)
+    minAgeDate.setHours(0, 0, 0, 0)
+
+    if (birthdate > today) {
+      showError("Impossible de sélectionner une date future")
+      return
+    }
+
+    if (birthdate > minAgeDate) {
+      showError("L'utilisateur doit avoir au moins 16 ans")
+      return
+    }
+  }
+
   const result = await authStore.updateProfile(profileForm.value)
   if (result.success) {
     message.value = { type: 'success', text: 'Profil mis à jour avec succès' }
   } else {
-    message.value = { type: 'error', text: result.error }
+    // Backend error (e.g. email already used)
+    showError(result.error)
   }
 }
 

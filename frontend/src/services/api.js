@@ -70,6 +70,8 @@ export const authAPI = {
   
   updatePlayerRole: (playerId, role) => api.put(`/admin/players/${playerId}/role?role=${role}`),
 
+  getPlayers: () => api.get('/admin/players'),
+
   // Teams
   getTeams: () => api.get('/admin/teams'),
   

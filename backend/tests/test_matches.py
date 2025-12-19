@@ -12,7 +12,7 @@ def test_teams(db_session):
     # Team 1
     p1 = Player(firstname="John", lastname="Doe", company="Company A", license_number="L000001", email="john@a.com")
     p2 = Player(firstname="Jane", lastname="Doe", company="Company A", license_number="L000002", email="jane@a.com")
-    t1 = Team(company="Company A")
+    t1 = Team(name="Company A")
     db_session.add_all([p1, p2, t1])
     db_session.commit()
     p1.team_id = t1.id
@@ -21,7 +21,7 @@ def test_teams(db_session):
     # Team 2
     p3 = Player(firstname="Bob", lastname="Smith", company="Company B", license_number="L000003", email="bob@b.com")
     p4 = Player(firstname="Alice", lastname="Smith", company="Company B", license_number="L000004", email="alice@b.com")
-    t2 = Team(company="Company B")
+    t2 = Team(name="Company B")
     db_session.add_all([p3, p4, t2])
     db_session.commit()
     p3.team_id = t2.id
@@ -50,7 +50,7 @@ def test_create_match(client, admin_token_headers, test_teams):
     data = response.json()
     assert data["court_number"] == 1
     assert data["status"] == "A_VENIR"
-    assert data["team1"]["company"] == "Company A"
+    assert data["team1"]["name"] == "Company A"
 
 def test_create_match_conflict(client, admin_token_headers, test_teams):
     t1, t2 = test_teams

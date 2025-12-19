@@ -1,3 +1,7 @@
+# ============================================
+# FICHIER : backend/app/schemas/matches.py
+# ============================================
+
 from pydantic import BaseModel, Field, field_validator, ValidationInfo, ConfigDict
 from typing import Optional, List
 from datetime import date, time
@@ -129,6 +133,14 @@ class MatchUpdate(BaseModel):
         if sets_won_1 < 2 and sets_won_2 < 2:
             raise ValueError("Il faut au moins 2 sets gagnants pour terminer un match")
             
+        return v
+    
+    @field_validator('date')
+    @classmethod
+    def validate_date(cls, v):
+        from datetime import date
+        if v < date.today():
+            raise ValueError("La date ne peut pas être dans le passé")
         return v
 
 class MatchResponse(BaseModel):

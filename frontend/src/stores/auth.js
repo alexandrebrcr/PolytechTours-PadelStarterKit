@@ -85,7 +85,13 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await authAPI.updateProfile(data)
+      // Clean data before sending
+      const payload = { ...data }
+      if (payload.birthdate === '') {
+        payload.birthdate = null
+      }
+
+      const response = await authAPI.updateProfile(payload)
       user.value = response.data
       localStorage.setItem('user', JSON.stringify(user.value))
       return { success: true }

@@ -13,7 +13,7 @@ import pytest
 def test_teams(db_session):
     teams = []
     for i in range(4):
-        team = Team(company=f"Company {i}")
+        team = Team(name=f"Company {i}")
         db_session.add(team)
         teams.append(team)
     db_session.commit()

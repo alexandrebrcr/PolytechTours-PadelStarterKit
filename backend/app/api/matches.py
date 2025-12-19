@@ -60,7 +60,7 @@ def get_matches(
         # Il faut faire une jointure ou un OR.
         # Déjà joint sur Team1, il faudrait aussi vérifier Team2.
         # Simplification : on filtre sur les équipes chargées
-        query = query.join(Team, Match.team2_id == Team.id, aliased=True) # Compliqué avec SQLAlchemy simple
+        # query = query.join(Team, Match.team2_id == Team.id, aliased=True) # Compliqué avec SQLAlchemy simple
         # On va faire plus simple : filter sur team1.company OR team2.company
         # Mais on a déjà join Team pour team1.
         pass # TODO: Implémenter filtre complexe si nécessaire, pour l'instant on filtre en Python ou on améliore la query

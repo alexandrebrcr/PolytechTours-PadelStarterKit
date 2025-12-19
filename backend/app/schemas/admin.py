@@ -1,3 +1,7 @@
+# ============================================
+# FICHIER : backend/app/schemas/admin.py
+# ============================================
+
 from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from typing import List, Optional
 import re

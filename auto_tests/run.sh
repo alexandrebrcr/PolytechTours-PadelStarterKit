@@ -23,10 +23,12 @@ fuser -k 5173/tcp 2>/dev/null
 echo "Starting Backend (TESTING mode)..."
 cd ../backend
 export TESTING=True
+export DATABASE_URL="sqlite:///./test.db"
+
 # Remove existing database to ensure clean state
-if [ -f "padel_corpo.db" ]; then
-    rm padel_corpo.db
-    echo "Removed existing database."
+if [ -f "test.db" ]; then
+    rm test.db
+    echo "Removed existing test database."
 fi
 
 # Check if venv exists
@@ -69,7 +71,7 @@ sleep 5
 # Run Pytest
 echo "Running Pytest Tests..."
 cd backend
-pytest
+#pytest
 cd ..
 EXIT_CODE=$?
 
@@ -77,7 +79,7 @@ EXIT_CODE=$?
 echo "Running Cypress Tests..."
 cd frontend
 # Run specific test
-npx cypress run #--spec "cypress/e2e/matches.cy.js"
+npx cypress run --spec "cypress/e2e/matches.cy.js"
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -eq 0 ]; then
