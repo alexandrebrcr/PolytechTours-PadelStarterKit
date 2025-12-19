@@ -71,7 +71,7 @@ sleep 5
 # Run Pytest
 echo "Running Pytest Tests..."
 cd backend
-#pytest
+pytest
 cd ..
 EXIT_CODE=$?
 
