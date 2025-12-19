@@ -107,13 +107,15 @@ def test_score_validation_valid(client, admin_token_headers, ranking_data):
     })
     match_id = response.json()["id"]
     
-    # Update avec score valide
+    # Update avec score valide (les deux scores sont requis)
     res = client.put(f"/api/v1/matches/{match_id}", headers=admin_token_headers, json={
         "status": "TERMINE",
-        "score_team1": "6-4, 3-6, 7-5"
+        "score_team1": "6-4, 3-6, 7-5",
+        "score_team2": "4-6, 6-3, 5-7"
     })
     assert res.status_code == 200
     assert res.json()["score_team1"] == "6-4, 3-6, 7-5"
+    assert res.json()["score_team2"] == "4-6, 6-3, 5-7"
 
 def test_score_validation_invalid_format(client, admin_token_headers, ranking_data):
     """Test score invalide (format)"""
@@ -137,7 +139,8 @@ def test_score_validation_invalid_format(client, admin_token_headers, ranking_da
     for score in invalid_scores:
         res = client.put(f"/api/v1/matches/{match_id}", headers=admin_token_headers, json={
             "status": "TERMINE",
-            "score_team1": score
+            "score_team1": score,
+            "score_team2": "6-0, 6-0"  # Score valide pour l'autre équipe
         })
         assert res.status_code == 422
 
@@ -162,6 +165,7 @@ def test_score_validation_invalid_rules(client, admin_token_headers, ranking_dat
     for score in invalid_scores:
         res = client.put(f"/api/v1/matches/{match_id}", headers=admin_token_headers, json={
             "status": "TERMINE",
-            "score_team1": score
+            "score_team1": score,
+            "score_team2": "6-0, 6-0"  # Score valide pour l'autre équipe
         })
         assert res.status_code == 422

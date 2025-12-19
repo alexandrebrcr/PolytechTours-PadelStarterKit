@@ -272,9 +272,8 @@ describe('Match Filters', () => {
     })
     cy.get('.fixed.z-50').should('not.exist')
 
-    // 3. Filter
-    // Use partial match "Filter" instead of full name
-    cy.get('input[placeholder="Rechercher..."]').type('Filter')
+    // 3. Filter by company using the select dropdown
+    cy.get('select').contains('Toutes').parents('select').select(companyName)
     cy.contains(companyName).should('be.visible')
   })
 
@@ -312,18 +311,24 @@ describe('Matches Logic & Validation', () => {
     cy.get('.fixed.z-50').within(() => {
         cy.get('select').last().select('Terminé')
         // On efface les scores au cas où
-        cy.get('input[placeholder="Ex: 6-4, 6-2"]').clear()
+        cy.get('input[placeholder="Ex: 6-4, 6-2"]').first().clear()
         
         // On force le clic car le bouton pourrait ne pas être disabled mais déclencher une erreur
         cy.contains('button', 'Enregistrer').click()
         
         // Vérifier l'erreur frontend
         cy.contains("Veuillez saisir les scores pour terminer le match").should('be.visible')
+        
+        // Fermer la modal pour continuer
+        cy.contains('button', 'Annuler').click()
     })
+    cy.get('.fixed.z-50').should('not.exist')
 
-    // 3. Ajouter les scores et valider -> Doit réussir
+    // 3. Ajouter les scores et valider -> Doit réussir (score_team2 calculé automatiquement)
+    cy.get('button[title="Modifier"]').first().click()
     cy.get('.fixed.z-50').within(() => {
-        cy.get('input[placeholder="Ex: 6-4, 6-2"]').type('6-0, 6-0')
+        cy.get('select').last().select('Terminé')
+        cy.get('input[placeholder="Ex: 6-4, 6-2"]').clear().type('6-0, 6-0')
         cy.contains('button', 'Enregistrer').click()
     })
     cy.get('.fixed.z-50').should('not.exist')
@@ -332,11 +337,13 @@ describe('Matches Logic & Validation', () => {
     // 4. Passer en ANNULÉ -> Les scores doivent disparaître
     cy.get('button[title="Modifier"]').first().click()
     cy.get('.fixed.z-50').within(() => {
-        // Vérifier que les scores sont là
+        // Le match est TERMINÉ donc l'input score est visible
         cy.get('input[placeholder="Ex: 6-4, 6-2"]').should('have.value', '6-0, 6-0')
         
-        // Changer statut
+        // Changer statut vers ANNULÉ (l'input disparaîtra car status != TERMINE)
         cy.get('select').last().select('Annulé')
+        // L'input score n'est plus visible car status != TERMINE
+        cy.get('input[placeholder="Ex: 6-4, 6-2"]').should('not.exist')
         cy.contains('button', 'Enregistrer').click()
     })
     
@@ -346,15 +353,23 @@ describe('Matches Logic & Validation', () => {
     cy.contains('6-0, 6-0').should('not.exist')
 
     // 5. Modifier SEULEMENT l'heure (Test "Input should be none")
+    // D'abord remettre à venir (car l'API refuse de modifier l'heure d'un match annulé)
     cy.get('button[title="Modifier"]').first().click()
     cy.get('.fixed.z-50').within(() => {
-        // On remet à venir pour pouvoir éditer l'heure proprement
         cy.get('select').last().select('À venir')
-        cy.get('input[type="time"]').type('18:00')
+        cy.contains('button', 'Enregistrer').click()
+    })
+    cy.get('.fixed.z-50').should('not.exist')
+    cy.contains('À venir').should('be.visible')
+    
+    // Ensuite modifier l'heure (maintenant le match est à venir)
+    cy.get('button[title="Modifier"]').first().click()
+    cy.get('.fixed.z-50').within(() => {
+        cy.get('input[type="time"]').clear().type('18:00')
         cy.contains('button', 'Enregistrer').click()
     })
     
-    // Si ça plante ici avec "Input should be none", c'est que le fix frontend payload n'a pas marché
+    // Si ça plante ici avec "Input should be none", c'est que le fix n'a pas marché
     cy.get('.fixed.z-50').should('not.exist')
     cy.contains('18:00').should('be.visible')
   })

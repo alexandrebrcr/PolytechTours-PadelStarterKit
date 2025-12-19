@@ -152,7 +152,7 @@
                   <select v-model.number="match.team1_id" required class="w-full border rounded p-2 text-sm">
                     <option value="">Sélectionner...</option>
                     <option v-for="team in teams" :key="team.id" :value="team.id" :disabled="isTeamSelected(team.id, idx)">
-                      {{ team.company }}
+                      {{ team.name }}
                     </option>
                   </select>
                 </div>
@@ -161,7 +161,7 @@
                   <select v-model.number="match.team2_id" required class="w-full border rounded p-2 text-sm">
                     <option value="">Sélectionner...</option>
                     <option v-for="team in teams" :key="team.id" :value="team.id" :disabled="isTeamSelected(team.id, idx)">
-                      {{ team.company }}
+                      {{ team.name }}
                     </option>
                   </select>
                 </div>

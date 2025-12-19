@@ -2,32 +2,59 @@
 # FICHIER : backend/tests/test_matches_filter.py
 # ============================================
 
-from fastapi.testclient import TestClient
-from app.main import app
-from app.core.security import create_access_token
+import pytest
+from datetime import date, timedelta, time
+from app.models.models import Match, Team, Player, MatchStatus, Event
 
-client = TestClient(app)
 
-def test_matches_company_filter():
-    # Login as admin
-    login_response = client.post("/api/v1/auth/login", json={
-        "email": "admin@padel.com",
-        "password": "Test@2025_2026"
-    })
-    token = login_response.json()["access_token"]
-    headers = {"Authorization": f"Bearer {token}"}
+@pytest.fixture
+def filter_data(db_session):
+    """Crée des données pour tester les filtres"""
+    # Team Dream Team
+    p1 = Player(firstname="P1", lastname="DT", company="Dream Team", email="p1@dt.com", license_number="LDT001")
+    p2 = Player(firstname="P2", lastname="DT", company="Dream Team", email="p2@dt.com", license_number="LDT002")
+    t1 = Team(name="Dream Team")
+    t1.players = [p1, p2]
 
-    # Create matches with different companies
-    # Assuming data is already seeded or we can create it.
-    # Let's check existing matches first.
+    # Team Equipe 42
+    p3 = Player(firstname="P3", lastname="E42", company="Equipe 42", email="p3@e42.com", license_number="LE42001")
+    p4 = Player(firstname="P4", lastname="E42", company="Equipe 42", email="p4@e42.com", license_number="LE42002")
+    t2 = Team(name="Equipe 42")
+    t2.players = [p3, p4]
+
+    db_session.add_all([p1, p2, p3, p4, t1, t2])
+    db_session.commit()
+    
+    # Créer un événement
+    event = Event(date=date.today() + timedelta(days=5), start_time=time(10, 0))
+    db_session.add(event)
+    db_session.commit()
+    
+    # Match Dream Team vs Equipe 42
+    m1 = Match(
+        event_id=event.id, court_number=1,
+        team1_id=t1.id, team2_id=t2.id,
+        status=MatchStatus.A_VENIR
+    )
+    
+    db_session.add(m1)
+    db_session.commit()
+    
+    return t1, t2
+
+
+def test_matches_company_filter(client, admin_token_headers, filter_data):
+    headers = admin_token_headers
+
+    # Les données créées dans filter_data contiennent Dream Team vs Equipe 42
     response = client.get("/api/v1/matches?all_matches=true", headers=headers)
     matches = response.json()
-    print(f"Total matches: {len(matches)}")
+    assert len(matches) >= 1  # Au moins notre match créé
     
     # Filter by "Dream Team"
     response = client.get("/api/v1/matches?company=Dream%20Team&all_matches=true", headers=headers)
     filtered_matches = response.json()
-    print(f"Filtered matches (Dream Team): {len(filtered_matches)}")
+    assert len(filtered_matches) >= 1
     
     for m in filtered_matches:
         t1 = m['team1']
@@ -43,7 +70,7 @@ def test_matches_company_filter():
     # Filter by "Equipe 42"
     response = client.get("/api/v1/matches?company=Equipe%2042&all_matches=true", headers=headers)
     filtered_matches_42 = response.json()
-    print(f"Filtered matches (Equipe 42): {len(filtered_matches_42)}")
+    assert len(filtered_matches_42) >= 1
 
     # Filter by non-existent company
     response = client.get("/api/v1/matches?company=NonExistent&all_matches=true", headers=headers)

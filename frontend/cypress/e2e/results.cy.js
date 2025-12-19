@@ -22,15 +22,16 @@ describe('Results Management', () => {
     // Wait for modal to close
     cy.get('div.fixed').should('not.exist')
 
-    cy.get('input[type="date"]').eq(1).type('2026-12-31') 
+    // Extend date range to see future matches
+    cy.get('input[type="date"]').eq(1).clear().type('2026-12-31')
+    cy.wait(500) // Wait for data reload
 
-    // 2. Enter Results
-    // Maintenant le match est visible, on peut le trouver
-    cy.contains('Dream Team').parents('.border-l-4').within(() => {
+    // 2. Enter Results - Find the match card containing "Dream Team"
+    cy.get('.border-l-4').contains('Dream Team').parents('.border-l-4').within(() => {
       cy.get('button[title="Modifier"]').click()
     })
 
-    // In Modal
+    // In Modal - score_team2 is calculated automatically from score_team1
     cy.get('div.fixed').contains('h2', 'Modifier le match').parents('div.fixed').within(() => {
       cy.get('select').last().select('Terminé')
       cy.get('input[placeholder="Ex: 6-4, 6-2"]').type('6-4, 6-4')
@@ -38,7 +39,7 @@ describe('Results Management', () => {
     })
 
     // 3. Verify Results
-    cy.contains('Dream Team').parents('.border-l-4').within(() => {
+    cy.get('.border-l-4').contains('Dream Team').parents('.border-l-4').within(() => {
       cy.contains('6-4, 6-4').should('exist')
       cy.contains('Terminé').should('exist')
     })
@@ -67,9 +68,10 @@ describe('Results Management', () => {
     // Wait for modal to close
     cy.get('div.fixed').should('not.exist')
 
-    cy.get('input[type="date"]').eq(1).type('2026-12-31') 
+    cy.get('input[type="date"]').eq(1).clear().type('2026-12-31')
+    cy.wait(500)
 
-    cy.contains('Piste 3').parents('.border-l-4').within(() => {
+    cy.get('.border-l-4').contains('Piste 3').parents('.border-l-4').within(() => {
       cy.get('button[title="Modifier"]').click()
     })
 
@@ -110,9 +112,10 @@ describe('Ranking Logic', () => {
     // Wait for modal to close
     cy.get('div.fixed').should('not.exist')
 
-    cy.get('input[type="date"]').eq(1).type('2026-12-31')
+    cy.get('input[type="date"]').eq(1).clear().type('2026-12-31')
+    cy.wait(500)
 
-    cy.contains('Piste 4').parents('.border-l-4').within(() => {
+    cy.get('.border-l-4').contains('Piste 4').parents('.border-l-4').within(() => {
       cy.get('button[title="Modifier"]').click()
     })
 
