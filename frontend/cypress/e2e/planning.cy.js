@@ -20,8 +20,8 @@ describe('Planning Management', () => {
         cy.intercept('GET', '/api/v1/admin/teams', {
             statusCode: 200,
             body: [
-                { id: 1, company: 'Team A', players: [] },
-                { id: 2, company: 'Team B', players: [] }
+                { id: 1, name: 'Team A', players: [] },
+                { id: 2, name: 'Team B', players: [] }
             ]
         }).as('getTeams')
 
@@ -38,8 +38,8 @@ describe('Planning Management', () => {
                             id: 100,
                             court_number: req.body.matches[0].court_number,
                             status: 'A_VENIR',
-                            team1: { id: 1, company: 'Team A', players: [] },
-                            team2: { id: 2, company: 'Team B', players: [] }
+                            team1: { id: 1, name: 'Team A', players: [] },
+                            team2: { id: 2, name: 'Team B', players: [] }
                         }
                     ]
                 }
@@ -59,8 +59,8 @@ describe('Planning Management', () => {
                             id: 100,
                             court_number: 1,
                             status: 'A_VENIR',
-                            team1: { id: 1, company: 'Team A', players: [] },
-                            team2: { id: 2, company: 'Team B', players: [] }
+                            team1: { id: 1, name: 'Team A', players: [] },
+                            team2: { id: 2, name: 'Team B', players: [] }
                         }
                     ]
                 }
@@ -110,8 +110,8 @@ describe('Planning Management', () => {
                             id: 100,
                             court_number: 1,
                             status: 'A_VENIR',
-                            team1: { id: 1, company: 'Team A', players: [] },
-                            team2: { id: 2, company: 'Team B', players: [] }
+                            team1: { id: 1, name: 'Team A', players: [] },
+                            team2: { id: 2, name: 'Team B', players: [] }
                         }
                     ]
                 }
