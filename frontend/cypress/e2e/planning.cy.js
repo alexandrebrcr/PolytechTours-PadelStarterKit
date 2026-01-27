@@ -1,6 +1,6 @@
 describe('Planning Management', () => {
     beforeEach(() => {
-        cy.login('admin@padel.com', 'Admin@2025!')
+        cy.login('admin@padel.com', 'Test@2025_2026')
     })
 
     it('should display planning page', () => {
@@ -20,8 +20,8 @@ describe('Planning Management', () => {
         cy.intercept('GET', '/api/v1/admin/teams', {
             statusCode: 200,
             body: [
-                { id: 1, company: 'Team A', players: [] },
-                { id: 2, company: 'Team B', players: [] }
+                { id: 1, name: 'Team A', players: [] },
+                { id: 2, name: 'Team B', players: [] }
             ]
         }).as('getTeams')
 
@@ -38,8 +38,8 @@ describe('Planning Management', () => {
                             id: 100,
                             court_number: req.body.matches[0].court_number,
                             status: 'A_VENIR',
-                            team1: { id: 1, company: 'Team A', players: [] },
-                            team2: { id: 2, company: 'Team B', players: [] }
+                            team1: { id: 1, name: 'Team A', players: [] },
+                            team2: { id: 2, name: 'Team B', players: [] }
                         }
                     ]
                 }
@@ -59,8 +59,8 @@ describe('Planning Management', () => {
                             id: 100,
                             court_number: 1,
                             status: 'A_VENIR',
-                            team1: { id: 1, company: 'Team A', players: [] },
-                            team2: { id: 2, company: 'Team B', players: [] }
+                            team1: { id: 1, name: 'Team A', players: [] },
+                            team2: { id: 2, name: 'Team B', players: [] }
                         }
                     ]
                 }
@@ -110,8 +110,8 @@ describe('Planning Management', () => {
                             id: 100,
                             court_number: 1,
                             status: 'A_VENIR',
-                            team1: { id: 1, company: 'Team A', players: [] },
-                            team2: { id: 2, company: 'Team B', players: [] }
+                            team1: { id: 1, name: 'Team A', players: [] },
+                            team2: { id: 2, name: 'Team B', players: [] }
                         }
                     ]
                 }
@@ -144,4 +144,28 @@ describe('Planning Management', () => {
         // Check UI
         cy.contains('1 match(s)').should('not.exist')
     })
+})
+
+describe('Planning Navigation', () => {
+  beforeEach(() => {
+    cy.login('admin@padel.com', 'Test@2025_2026')
+    cy.visit('/planning')
+  })
+
+  it('should display current month', () => {
+    const date = new Date()
+    const currentMonth = new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(date)
+    const currentYear = date.getFullYear()
+    
+    // Use regex for case-insensitive match because of CSS capitalization
+    cy.get('h2').invoke('text').should('match', new RegExp(currentMonth, 'i'))
+    cy.get('h2').should('contain', currentYear)
+  })
+
+  it('should navigate to next month', () => {
+    cy.get('h2').invoke('text').then((text1) => {
+        cy.contains('button', 'Suivant').click()
+        cy.get('h2').invoke('text').should('not.eq', text1)
+    })
+  })
 })

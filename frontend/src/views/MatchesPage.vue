@@ -36,12 +36,13 @@
         <template v-if="authStore.isAdmin">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Entreprise</label>
-            <input 
-              type="text" 
+            <select 
               v-model="filters.company"
-              placeholder="Rechercher..."
               class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             >
+              <option value="">Toutes</option>
+              <option v-for="c in companies" :key="c" :value="c">{{ c }}</option>
+            </select>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
@@ -119,29 +120,28 @@
             <div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
               <!-- Team 1 -->
               <div class="text-center flex-1">
-                <div class="font-bold text-lg">{{ match.team1.company }}</div>
+                <div class="font-bold text-lg">{{ match.team1.name }}</div>
                 <div class="text-sm text-gray-600">
                   <div v-for="player in match.team1.players" :key="player.id">
                     {{ player.firstname }} {{ player.lastname }}
                   </div>
                 </div>
-                <div v-if="match.status === 'TERMINE'" class="text-2xl font-bold mt-2 text-blue-600">
+              </div>
+
+              <div class="flex flex-col items-center">
+                <div class="text-gray-400 font-bold text-xl">VS</div>
+                <div v-if="match.status === 'TERMINE'" class="text-xl font-bold mt-1 text-blue-600">
                   {{ match.score_team1 }}
                 </div>
               </div>
 
-              <div class="text-gray-400 font-bold text-xl">VS</div>
-
               <!-- Team 2 -->
               <div class="text-center flex-1">
-                <div class="font-bold text-lg">{{ match.team2.company }}</div>
+                <div class="font-bold text-lg">{{ match.team2.name }}</div>
                 <div class="text-sm text-gray-600">
                   <div v-for="player in match.team2.players" :key="player.id">
                     {{ player.firstname }} {{ player.lastname }}
                   </div>
-                </div>
-                <div v-if="match.status === 'TERMINE'" class="text-2xl font-bold mt-2 text-blue-600">
-                  {{ match.score_team2 }}
                 </div>
               </div>
             </div>
@@ -227,7 +227,7 @@
                 :disabled="isEditing"
               >
                 <option v-for="team in teams" :key="team.id" :value="team.id">
-                  {{ team.company }}
+                  {{ team.name }}
                 </option>
               </select>
             </div>
@@ -240,7 +240,7 @@
                 :disabled="isEditing"
               >
                 <option v-for="team in teams" :key="team.id" :value="team.id">
-                  {{ team.company }}
+                  {{ team.name }}
                 </option>
               </select>
             </div>
@@ -259,30 +259,36 @@
               </select>
             </div>
 
-            <div v-if="form.status === 'TERMINE'" class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Score Équipe 1</label>
-                <input 
-                  type="text" 
-                  v-model="form.score_team1"
-                  placeholder="ex: 6-4 6-2"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Score Équipe 2</label>
-                <input 
-                  type="text" 
-                  v-model="form.score_team2"
-                  placeholder="ex: 4-6 2-6"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-              </div>
+            <div v-if="form.status === 'TERMINE'" class="col-span-2">
+              <label class="block text-sm font-medium text-gray-700">Score (Vue {{ currentTeam1Name }})</label>
+              <input 
+                type="text" 
+                v-model="form.score_team1"
+                placeholder="Ex: 6-4, 6-2"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                @input="updateScoreTeam2"
+              >
+              <p class="text-xs text-gray-500 mt-1">Le score de l'équipe 2 sera calculé automatiquement : {{ form.score_team2 }}</p>
             </div>
           </div>
 
-          <div v-if="error" class="text-red-600 text-sm mt-2">
-            {{ error }}
+          <div v-if="uniqueErrors" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4" role="alert">
+            <strong class="font-bold">Erreur !</strong>
+            <div v-if="Array.isArray(uniqueErrors)">
+              <ul class="list-disc list-inside">
+                <li v-for="(err, index) in uniqueErrors" :key="index">
+                  {{ err }}
+                </li>
+              </ul>
+            </div>
+            <span v-else class="block sm:inline">{{ uniqueErrors }}</span>
+            <div v-if="uniqueErrors.toString().includes('Format de score invalide') || (Array.isArray(uniqueErrors) && uniqueErrors.some(e => e.includes('Format de score')))">
+              <p class="mt-2 font-semibold">Format attendu :</p>
+              <ul class="list-disc list-inside ml-2">
+                <li>X-Y, X-Y (ex: 6-4, 6-2)</li>
+                <li>X-Y, X-Y, X-Y (ex: 6-4, 4-6, 6-2)</li>
+              </ul>
+            </div>
           </div>
 
           <div class="flex justify-end gap-4 mt-6">
@@ -308,16 +314,46 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { matchesAPI, authAPI } from '../services/api'
 import { useAuthStore } from '../stores/auth'
 
 const authStore = useAuthStore()
+console.log('MatchesPage mounted, isAdmin:', authStore.isAdmin)
 const matches = ref([])
 const teams = ref([])
+const players = ref([])
 const loading = ref(false)
 const error = ref(null)
 const submitting = ref(false)
+const currentTeam1Name = ref('')
+
+const uniqueErrors = computed(() => {
+  if (!error.value) return null
+  if (Array.isArray(error.value)) {
+    const messages = error.value.map(e => {
+        let msg = (typeof e === 'object' && e.msg) ? e.msg : e
+        return typeof msg === 'string' ? msg.replace('Value error, ', '') : msg
+    })
+    return [...new Set(messages)]
+  }
+  return typeof error.value === 'string' ? error.value.replace('Value error, ', '') : error.value
+})
+
+const companies = computed(() => {
+  const s = new Set()
+  // From teams
+  teams.value.forEach(t => {
+    t.players.forEach(p => {
+      if (p.company) s.add(p.company)
+    })
+  })
+  // From all players (if fetched)
+  players.value.forEach(p => {
+    if (p.company) s.add(p.company)
+  })
+  return Array.from(s).sort()
+})
 
 // Filters
 const filters = ref({
@@ -374,14 +410,35 @@ const fetchTeams = async () => {
   }
 }
 
+// Fetch players (for admin companies list)
+const fetchPlayers = async () => {
+  if (authStore.isAdmin && players.value.length === 0) {
+    try {
+      const response = await authAPI.getPlayers()
+      players.value = response.data
+    } catch (err) {
+      console.error('Erreur chargement joueurs:', err)
+    }
+  }
+}
+
 // Watch filters
 watch(filters, () => {
   fetchMatches()
 }, { deep: true })
 
+// Watch admin status
+watch(() => authStore.isAdmin, (newVal) => {
+  if (newVal) {
+    fetchTeams()
+    fetchPlayers()
+  }
+})
+
 onMounted(() => {
   fetchMatches()
   fetchTeams()
+  fetchPlayers()
 })
 
 // Formatters
@@ -428,6 +485,7 @@ const openCreateModal = () => {
 const openEditModal = (match) => {
   isEditing.value = true
   currentMatchId.value = match.id
+  currentTeam1Name.value = match.team1.name
   form.value = {
     date: match.date,
     time: match.time.substring(0, 5), // HH:MM:SS -> HH:MM
@@ -447,6 +505,29 @@ const closeModal = () => {
   showModal.value = false
 }
 
+const updateScoreTeam2 = () => {
+  if (!form.value.score_team1) {
+    form.value.score_team2 = ''
+    return
+  }
+  
+  try {
+    // Invert score logic
+    // "6-4, 6-2" -> "4-6, 2-6"
+    const sets = form.value.score_team1.split(',').map(s => s.trim())
+    const invertedSets = sets.map(set => {
+      const parts = set.split('-')
+      if (parts.length === 2) {
+        return `${parts[1]}-${parts[0]}`
+      }
+      return set
+    })
+    form.value.score_team2 = invertedSets.join(', ')
+  } catch (e) {
+    // Ignore errors during typing
+  }
+}
+
 const submitForm = async () => {
   submitting.value = true
   error.value = null
@@ -456,15 +537,58 @@ const submitForm = async () => {
       throw new Error("Les deux équipes doivent être différentes")
     }
 
+    // 1. Validation Frontend : Score obligatoire si Terminé
+    if (form.value.status === 'TERMINE') {
+      if (!form.value.score_team1 || !form.value.score_team2) {
+        throw new Error("Veuillez saisir les scores pour terminer le match")
+      }
+    }
+
+    // Préparation du payload
+    const payload = {}
+
     if (isEditing.value) {
-      await matchesAPI.updateMatch(currentMatchId.value, form.value)
+      const originalMatch = matches.value.find(m => m.id === currentMatchId.value)
+      
+      // Logique de Diff : On n'ajoute QUE ce qui a changé
+      if (form.value.date !== originalMatch.date) payload.date = form.value.date
+      
+      // Comparaison Heure (HH:MM vs HH:MM:SS)
+      const originalTime = originalMatch.time.substring(0, 5)
+      if (form.value.time !== originalTime) payload.time = form.value.time
+      
+      if (form.value.court_number !== originalMatch.court_number) payload.court_number = form.value.court_number
+      if (form.value.status !== originalMatch.status) payload.status = form.value.status
+      
+      // Gestion des Scores
+      if (form.value.status === 'A_VENIR' || form.value.status === 'ANNULE') {
+        // Si on annule ou remet à venir, on force la suppression des scores
+        // On l'envoie explicitement pour que le backend le prenne en compte (bien que le backend le force aussi maintenant)
+        payload.score_team1 = null
+        payload.score_team2 = null
+      } else {
+        // Sinon, on envoie les scores s'ils ont changé
+        if (form.value.score_team1 !== (originalMatch.score_team1 || '')) payload.score_team1 = form.value.score_team1
+        if (form.value.score_team2 !== (originalMatch.score_team2 || '')) payload.score_team2 = form.value.score_team2
+      }
+
+      // Si le payload est vide, on ne fait rien
+      if (Object.keys(payload).length > 0) {
+        await matchesAPI.updateMatch(currentMatchId.value, payload)
+      }
     } else {
-      await matchesAPI.createMatch(form.value)
+      // En création
+      const createPayload = { ...form.value }
+      // Nettoyage des scores vides en création
+      if (!createPayload.score_team1) createPayload.score_team1 = null
+      if (!createPayload.score_team2) createPayload.score_team2 = null
+      await matchesAPI.createMatch(createPayload)
     }
     
     closeModal()
     fetchMatches()
   } catch (err) {
+    console.error(err)
     error.value = err.response?.data?.detail || err.message || 'Une erreur est survenue'
   } finally {
     submitting.value = false

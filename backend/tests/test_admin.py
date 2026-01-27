@@ -1,3 +1,7 @@
+# ============================================
+# FICHIER : backend/tests/test_admin.py
+# ============================================
+
 import pytest
 from fastapi import status
 from app.models.models import Player, Team, Pool, User
@@ -78,13 +82,13 @@ def test_create_team_success(client, admin_token_headers, db_session):
     db_session.commit()
     
     data = {
-        "company": "CorpA",
+        "name": "CorpA",
         "player1_id": p1.id,
         "player2_id": p2.id
     }
     response = client.post("/api/v1/admin/teams", json=data, headers=admin_token_headers)
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()["company"] == "CorpA"
+    assert response.json()["name"] == "CorpA"
 
 def test_create_team_different_companies(client, admin_token_headers, db_session):
     """Test création équipe avec entreprises différentes"""
@@ -94,7 +98,7 @@ def test_create_team_different_companies(client, admin_token_headers, db_session
     db_session.commit()
     
     data = {
-        "company": "CorpA",
+        "name": "CorpA",
         "player1_id": p1.id,
         "player2_id": p2.id
     }
@@ -114,7 +118,7 @@ def test_create_pool_success(client, admin_token_headers, db_session):
         db_session.add_all([p1, p2])
         db_session.commit()
         
-        team = Team(company=f"C{i}")
+        team = Team(name=f"C{i}")
         db_session.add(team)
         db_session.commit()
         

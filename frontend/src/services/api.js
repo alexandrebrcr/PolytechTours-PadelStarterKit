@@ -70,6 +70,8 @@ export const authAPI = {
   
   updatePlayerRole: (playerId, role) => api.put(`/admin/players/${playerId}/role?role=${role}`),
 
+  getPlayers: () => api.get('/admin/players'),
+
   // Teams
   getTeams: () => api.get('/admin/teams'),
   
@@ -78,7 +80,14 @@ export const authAPI = {
 }
 
 export const matchesAPI = {
-  getMatches: (params) => api.get('/matches', { params }),
+  getMatches: (params) => {
+    // Map status to status_filter for backend
+    if (params.status) {
+      params.status_filter = params.status
+      delete params.status
+    }
+    return api.get('/matches', { params })
+  },
   createMatch: (data) => api.post('/matches', data),
   updateMatch: (id, data) => api.put(`/matches/${id}`, data),
   deleteMatch: (id) => api.delete(`/matches/${id}`)

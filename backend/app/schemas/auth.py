@@ -21,11 +21,18 @@ class UserUpdate(BaseModel):
     email: EmailStr
     birthdate: Optional[date] = None
 
-    @field_validator('firstname', 'lastname')
+    @field_validator('firstname')
     @classmethod
-    def validate_name(cls, v):
-        if not re.match(r"^[a-zA-Z\s\-\']+$", v):
-            raise ValueError("Le nom/prénom ne doit contenir que des lettres, espaces, tirets et apostrophes")
+    def validate_firstname(cls, v):
+        if not re.match(r"^[a-zA-Z\s\-_']+$", v):
+            raise ValueError("Le prénom ne doit contenir que des lettres, espaces, tirets, underscores et apostrophes")
+        return v
+
+    @field_validator('lastname')
+    @classmethod
+    def validate_lastname(cls, v):
+        if not re.match(r"^[a-zA-Z\s\-_\.']+$", v):
+            raise ValueError("Le nom ne doit contenir que des lettres, espaces, tirets, underscores, points et apostrophes")
         return v
 
     @field_validator('birthdate')

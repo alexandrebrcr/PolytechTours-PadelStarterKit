@@ -1,3 +1,7 @@
+# ============================================
+# FICHIER : backend/app/schemas/planning.py
+# ============================================
+
 from pydantic import BaseModel, Field, field_validator, ValidationInfo, ConfigDict
 from typing import List, Optional
 from datetime import date, time

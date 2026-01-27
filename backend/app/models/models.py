@@ -63,7 +63,7 @@ class Team(Base):
     __tablename__ = "teams"
     
     id = Column(Integer, primary_key=True, index=True)
-    company = Column(String, nullable=False)
+    name = Column(String, unique=True, nullable=False)
     
     # Relation avec Player
     players = relationship("Player", back_populates="team")

@@ -189,7 +189,7 @@ async def upload_avatar(
     
     # Validation du fichier
     if not file.content_type in ["image/jpeg", "image/png", "image/jpg"]:
-        raise HTTPException(400, detail="Format de fichier non supporté (JPG/PNG uniquement)")
+        raise HTTPException(400, detail="Format de fichier non supporté (JPG/JPEG/PNG uniquement)")
     
     # Vérifier la taille (approximatif car on lit le stream)
     content = await file.read()

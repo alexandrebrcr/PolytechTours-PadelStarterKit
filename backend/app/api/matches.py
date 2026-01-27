@@ -1,3 +1,7 @@
+# ============================================
+# FICHIER : backend/app/api/matches.py
+# ============================================
+
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
@@ -60,7 +64,7 @@ def get_matches(
         # Il faut faire une jointure ou un OR.
         # Déjà joint sur Team1, il faudrait aussi vérifier Team2.
         # Simplification : on filtre sur les équipes chargées
-        query = query.join(Team, Match.team2_id == Team.id, aliased=True) # Compliqué avec SQLAlchemy simple
+        # query = query.join(Team, Match.team2_id == Team.id, aliased=True) # Compliqué avec SQLAlchemy simple
         # On va faire plus simple : filter sur team1.company OR team2.company
         # Mais on a déjà join Team pour team1.
         pass # TODO: Implémenter filtre complexe si nécessaire, pour l'instant on filtre en Python ou on améliore la query
@@ -93,7 +97,15 @@ def get_matches(
     
     # Filtrage Python pour 'company' si nécessaire car la query est complexe
     if company:
-        matches = [m for m in matches if m.team1.company == company or m.team2.company == company]
+        company_lower = company.lower()
+        # On filtre sur le nom de l'équipe OU l'entreprise des joueurs
+        matches = [
+            m for m in matches 
+            if company_lower in m.team1.name.lower() 
+            or company_lower in m.team2.name.lower()
+            or any(company_lower in p.company.lower() for p in m.team1.players)
+            or any(company_lower in p.company.lower() for p in m.team2.players)
+        ]
 
     return [map_match_to_response(m) for m in matches]
 
@@ -194,11 +206,29 @@ def update_match(
     if match_in.status:
         match.status = match_in.status
         
-    # Scores
-    if match_in.score_team1 is not None:
-        match.score_team1 = match_in.score_team1
-    if match_in.score_team2 is not None:
-        match.score_team2 = match_in.score_team2
+        # Si le statut passe à TERMINE, on vérifie que les scores sont présents
+        if match.status == MatchStatus.TERMINE:
+            # On vérifie soit dans match_in (nouveau score), soit dans match (score existant)
+            s1 = match_in.score_team1 if match_in.score_team1 is not None else match.score_team1
+            s2 = match_in.score_team2 if match_in.score_team2 is not None else match.score_team2
+            
+            if not s1 or not s2:
+                raise HTTPException(400, "Impossible de terminer un match sans scores")
+        
+        # Si le statut n'est pas TERMINE, on efface les scores
+        if match.status != MatchStatus.TERMINE:
+            match.score_team1 = None
+            match.score_team2 = None
+            # On ignore les scores envoyés dans match_in si le statut n'est pas TERMINE
+            match_in.score_team1 = None
+            match_in.score_team2 = None
+
+    # Scores (seulement si TERMINE)
+    if match.status == MatchStatus.TERMINE:
+        if match_in.score_team1 is not None:
+            match.score_team1 = match_in.score_team1
+        if match_in.score_team2 is not None:
+            match.score_team2 = match_in.score_team2
         
     db.commit()
     db.refresh(match)
@@ -227,9 +257,11 @@ def delete_match(
     # On devrait supprimer l'Event si c'est du 1-1.
     event_id = match.event_id
     db.delete(match)
-    # Vérifier s'il reste des matchs pour cet event (si jamais on a changé la logique)
-    # Si 1-1, on supprime l'event.
-    other_matches = db.query(Match).filter(Match.event_id == event_id).count()
+    
+    # Vérifier s'il reste des matchs pour cet event
+    # On exclut le match qu'on vient de supprimer (au cas où le flush n'est pas fait)
+    other_matches = db.query(Match).filter(Match.event_id == event_id, Match.id != match_id).count()
+    
     if other_matches == 0:
         event = db.query(Event).filter(Event.id == event_id).first()
         if event:

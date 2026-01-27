@@ -1,3 +1,7 @@
+# ============================================
+# FICHIER : backend/app/api/planning.py
+# ============================================
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional

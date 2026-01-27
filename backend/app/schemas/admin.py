@@ -1,3 +1,7 @@
+# ============================================
+# FICHIER : backend/app/schemas/admin.py
+# ============================================
+
 from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from typing import List, Optional
 import re
@@ -10,11 +14,18 @@ class PlayerBase(BaseModel):
     license_number: str
     email: EmailStr
 
-    @field_validator('firstname', 'lastname')
+    @field_validator('firstname')
     @classmethod
-    def validate_name(cls, v):
-        if not re.match(r"^[a-zA-Z\s]+$", v):
-            raise ValueError("Le nom/prénom ne doit contenir que des lettres et espaces")
+    def validate_firstname(cls, v):
+        if not re.match(r"^[a-zA-Z\s\-_']+$", v):
+            raise ValueError("Le prénom ne doit contenir que des lettres, espaces, tirets, underscores et apostrophes")
+        return v
+
+    @field_validator('lastname')
+    @classmethod
+    def validate_lastname(cls, v):
+        if not re.match(r"^[a-zA-Z\s\-_\.']+$", v):
+            raise ValueError("Le nom ne doit contenir que des lettres, espaces, tirets, underscores, points et apostrophes")
         return v
 
     @field_validator('license_number')
@@ -32,11 +43,18 @@ class PlayerUpdate(BaseModel):
     lastname: Optional[str] = Field(None, min_length=2, max_length=50)
     company: Optional[str] = Field(None, min_length=2, max_length=100)
     
-    @field_validator('firstname', 'lastname')
+    @field_validator('firstname')
     @classmethod
-    def validate_name(cls, v):
-        if v and not re.match(r"^[a-zA-Z\s]+$", v):
-            raise ValueError("Le nom/prénom ne doit contenir que des lettres et espaces")
+    def validate_firstname(cls, v):
+        if v and not re.match(r"^[a-zA-Z\s\-_']+$", v):
+            raise ValueError("Le prénom ne doit contenir que des lettres, espaces, tirets, underscores et apostrophes")
+        return v
+
+    @field_validator('lastname')
+    @classmethod
+    def validate_lastname(cls, v):
+        if v and not re.match(r"^[a-zA-Z\s\-_\.']+$", v):
+            raise ValueError("Le nom ne doit contenir que des lettres, espaces, tirets, underscores, points et apostrophes")
         return v
 
 class PlayerResponse(PlayerBase):
@@ -48,13 +66,13 @@ class PlayerResponse(PlayerBase):
 
 # --- Teams ---
 class TeamCreate(BaseModel):
-    company: str
+    name: str
     player1_id: int
     player2_id: int
 
 class TeamResponse(BaseModel):
     id: int
-    company: str
+    name: str
     players: List[PlayerResponse]
     pool_id: Optional[int] = None
     

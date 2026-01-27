@@ -1,3 +1,7 @@
+# ============================================
+# FICHIER : backend/app/api/results.py
+# ============================================
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session, joinedload
 from typing import List
@@ -11,6 +15,7 @@ router = APIRouter()
 
 class RankingEntry(BaseModel):
     position: int
+    team_name: str
     company: str
     matches_played: int
     wins: int
@@ -22,7 +27,7 @@ class RankingEntry(BaseModel):
 @router.get("/ranking", response_model=List[RankingEntry])
 def get_ranking(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     """
-    Calcule et retourne le classement général des entreprises.
+    Calcule et retourne le classement général des équipes.
     """
     # Récupérer tous les matchs terminés
     matches = db.query(Match).options(
@@ -30,14 +35,16 @@ def get_ranking(db: Session = Depends(get_db), current_user = Depends(get_curren
         joinedload(Match.team2)
     ).filter(Match.status == MatchStatus.TERMINE).all()
     
-    # Récupérer toutes les équipes pour initialiser le classement (même celles sans matchs)
-    teams = db.query(Team).all()
+    # Récupérer toutes les équipes pour initialiser le classement
+    teams = db.query(Team).options(joinedload(Team.players)).all()
     
-    stats = {} # team_id -> {company, played, wins, losses, points, sets_won, sets_lost}
+    stats = {} # team_id -> {team_name, company, played, wins, losses, points, sets_won, sets_lost}
     
     for team in teams:
+        company = team.players[0].company if team.players else "Inconnu"
         stats[team.id] = {
-            "company": team.company,
+            "team_name": team.name,
+            "company": company,
             "matches_played": 0,
             "wins": 0,
             "losses": 0,
@@ -50,9 +57,6 @@ def get_ranking(db: Session = Depends(get_db), current_user = Depends(get_curren
         if not match.score_team1:
             continue
             
-        # Parser le score
-        # On suppose que score_team1 est le score vu par l'équipe 1
-        # Format "6-4, 6-3"
         try:
             sets = match.score_team1.split(", ")
             t1_sets = 0
@@ -111,7 +115,7 @@ def get_ranking(db: Session = Depends(get_db), current_user = Depends(get_curren
         -x["points"],
         -x["wins"],
         -(x["sets_won"] - x["sets_lost"]),
-        x["company"]
+        x["team_name"]
     ))
     
     # Assigner les positions
@@ -119,6 +123,7 @@ def get_ranking(db: Session = Depends(get_db), current_user = Depends(get_curren
     for i, data in enumerate(ranking):
         result.append(RankingEntry(
             position=i + 1,
+            team_name=data["team_name"],
             company=data["company"],
             matches_played=data["matches_played"],
             wins=data["wins"],

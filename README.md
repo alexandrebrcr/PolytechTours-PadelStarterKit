@@ -1,131 +1,100 @@
-# 🎾 Corpo Padel - Kit de Démarrage
+# 🎾 Corpo Padel - Gestion de Tournois
 
-Application de gestion de tournois corporatifs de padel.
+Application complète pour la gestion de tournois corporatifs de padel, centralisant la gestion des événements, des matchs, des résultats et des plannings.
 
-## 📦 Contenu
+## 🛠 Technologies
+- **Backend** : FastAPI (Python), SQLAlchemy, SQLite.
+- **Frontend** : Vue.js 3, Pinia, TailwindCSS.
+- **Tests** : Pytest (Backend), Cypress (Frontend E2E).
 
-- **Backend** : FastAPI avec authentification JWT
-- **Frontend** : VueJS 3 avec Vue Router et Pinia
-- **Base de données** : SQLite
-- **Tests** : Pytest (backend) + Cypress (frontend)
+## 🚀 Installation et Lancement
 
-## 💻 Kit de démarrage fonctionnel
-
-### Backend (FASTAPI)
-```
-backend/
-├── app/
-│   ├── api/
-│   │   ├── auth.py          ✅ Routes d'authentification
-│   │   └── deps.py          ✅ Dépendances (get_current_user)
-│   ├── core/
-│   │   ├── config.py        ✅ Configuration
-│   │   └── security.py      ✅ JWT + hashing
-│   ├── models/
-│   │   └── models.py        ✅ User + LoginAttempt
-│   ├── schemas/
-│   │   └── auth.py          ✅ Schémas Pydantic
-│   ├── database.py          ✅ Configuration SQLAlchemy
-│   └── main.py              ✅ Application FastAPI
-├── tests/
-│   ├── conftest.py          ✅ Fixtures
-│   ├── test_auth.py         ✅ Tests authentification
-│   ├── test_security.py     ✅ Tests sécurité
-│   └── test_validation.py   ✅ Tests validation
-├── .env.example
-├── requirements.txt
-└── README.md
-```
-
-### Frontend (VueJS)
-```
-frontend/
-├── src/
-│   ├── components/
-│   │   └── NavBar.vue       ✅ Barre de navigation
-│   ├── router/
-│   │   └── index.js         ✅ Routing avec guards
-│   ├── services/
-│   │   └── api.js           ✅ Client Axios + intercepteurs
-│   ├── stores/
-│   │   └── auth.js          ✅ Store Pinia authentification
-│   ├── views/
-│   │   ├── HomePage.vue     ✅ Page d'accueil
-│   │   └── LoginPage.vue    ✅ Page de connexion
-│   ├── App.vue
-│   └── main.js
-├── cypress/
-│   ├── e2e/
-│   │   ├── auth.cy.js       ✅ Tests E2E auth
-│   │   └── navigation.cy.js ✅ Tests navigation
-│   └── support/
-│       └── commands.js      ✅ Commandes custom
-├── .env.example
-├── package.json
-└── README.md
-```
-
-## 🚀 Démarrage rapide
-
-### Backend
+### 1. Backend (API)
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# ou venv\Scripts\activate sur Windows
+source venv/bin/activate  # Sur Windows : venv\Scripts\activate
 pip install -r requirements.txt
+
+# Copier les variables d'environnement (si nécessaire)
 cp .env.example .env
-# Générer une SECRET_KEY : python -c "import secrets; print(secrets.token_urlsafe(32))"
+
+# Initialiser la base de données
 python3 -c "from app.database import init_db; init_db()"
+
+# Lancer le serveur
 uvicorn app.main:app --reload
 ```
+Le backend sera accessible sur `http://localhost:8000`.
 
-### Frontend
+### 2. Frontend (Interface)
 ```bash
 cd frontend
 npm install
+
+# Copier les variables d'environnement
 cp .env.example .env
+
+# Lancer le serveur de développement
 npm run dev
 ```
+L'application sera accessible sur `http://localhost:5173`.
 
-## 🔐 Compte de test
+## 🧪 Exécution des Tests
 
-- **Email** : admin@padel.com
-- **Mot de passe** : Test@2025_2026
+Ce projet intègre une suite de tests automatisés pour garantir la stabilité du backend et du frontend.
 
-## 📚 Documentation
+### ✅ Méthode Automatique (Script Global)
 
-Consultez le cahier des charges complet pour les spécifications détaillées.
+Le moyen le plus simple de vérifier l'ensemble du projet :
+```bash
+# Depuis la racine du projet
+chmod +x auto_tests/run.sh  # (Une seule fois si nécessaire)
+./auto_tests/run.sh
+```
+Ce script lance les tests backend (Pytest) puis les tests frontend (Cypress) et affiche un rapport global.
 
-## ✅ Fonctionnalités implémentées
+### 🐍 Tests Backend (Pytest)
 
-- ✅ Authentification JWT
-- ✅ Anti-brute force (5 tentatives, blocage 30min)
-- ✅ Page d'accueil
-- ✅ Page de login
-- ✅ Navigation avec guards
+Pour exécuter manuellement les tests de l'API :
+```bash
+cd backend
+# Activer l'environnement virtuel si ce n'est pas déjà fait
+source venv/bin/activate
 
-## 🎯 À développer
+# Lancer tous les tests
+pytest
 
-Toutes les autres fonctionnalités selon le cahier des charges :
-- Gestion des joueurs, équipes, poules
-- Planning et événements
-- Matchs et résultats
-- Administration
-- Profil utilisateur
+# Lancer un fichier de test spécifique
+pytest tests/test_matches.py
+```
+
+### 🌲 Tests Frontend (Cypress)
+
+Pour exécuter manuellement les tests d'interface :
+```bash
+cd frontend
+
+# Lancer tous les tests en mode console (Headless)
+npx cypress run
+
+# Ouvrir l'interface interactive de Cypress pour le débogage
+npx cypress open
+```
+
+## ✨ Fonctionnalités
+- **Authentification Sécurisée** : Connexion JWT, protection anti-brute force.
+- **Gestion des Matchs** : Saisie des scores, validation des formats, historique.
+- **Planning** : Vue d'ensemble des événements et des disponibilités.
+- **Résultats** : Tableaux des scores et mises à jour en temps réel.
+- **Administration** : Gestion des utilisateurs et configuration globale.
+
+## 🔐 Identifiants de Démonstration
+
+Un compte administrateur est pré-configuré pour tester l'application :
+- **Email** : `admin@padel.com`
+- **Mot de passe** : `Test@2025_2026`
 
 ## 📞 Support
 
-Consultez le README détaillé dans backend/ et frontend/
-
-## Commandes utiles
-
-Pour l'execution des tests backend
-```bash
-pytest
-```
-
-Pour l'execution des tests frontend
-```bash
-npx cypress run
-```
+Pour plus de détails techniques, consultez les fichiers `README.md` spécifiques dans les dossiers `backend/` et `frontend/`.

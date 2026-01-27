@@ -33,7 +33,7 @@ def init_db():
         if not admin:
             admin = User(
                 email="admin@padel.com",
-                password_hash=get_password_hash("Admin@2025!"),
+                password_hash=get_password_hash("Test@2025_2026"),
                 role="ADMINISTRATEUR",
                 is_active=True,
                 firstname="Admin",
@@ -44,5 +44,70 @@ def init_db():
             # Admin created
         else:
             pass
+    finally:
+        db.close()
+
+def init_db_test():
+    """Initialise la base de données avec des données de test"""
+    init_db()
+    
+    from app.models.models import Player, Team
+    
+    db = SessionLocal()
+    try:
+        # Create test players for Matches test
+        players_data = [
+            {"email": "pierre@test.com", "firstname": "Pierre", "lastname": "Test", "company": "Dream Team", "license_number": "L000001"},
+            {"email": "jean@test.com", "firstname": "Jean", "lastname": "Test", "company": "Dream Team", "license_number": "L000002"},
+            {"email": "alice@test.com", "firstname": "Alice", "lastname": "Test", "company": "Equipe 42", "license_number": "L000003"},
+            {"email": "bob@test.com", "firstname": "Bob", "lastname": "Test", "company": "Equipe 42", "license_number": "L000004"},
+            {"email": "charlie@test.com", "firstname": "Charlie", "lastname": "Test", "company": "Other", "license_number": "L000005"},
+        ]
+
+        for p in players_data:
+            player = db.query(Player).filter(Player.email == p["email"]).first()
+            if not player:
+                player = Player(
+                    email=p["email"],
+                    firstname=p["firstname"],
+                    lastname=p["lastname"],
+                    company=p["company"],
+                    license_number=p["license_number"]
+                )
+                db.add(player)
+        
+        db.commit()
+
+        # Create Teams
+        # Dream Team Team
+        p1 = db.query(Player).filter(Player.email == "pierre@test.com").first()
+        p2 = db.query(Player).filter(Player.email == "jean@test.com").first()
+        
+        if p1 and p2:
+            team_a = db.query(Team).filter(Team.name == "Dream Team").first()
+            if not team_a:
+                team_a = Team(name="Dream Team")
+                db.add(team_a)
+                db.commit()
+                
+                p1.team_id = team_a.id
+                p2.team_id = team_a.id
+                db.commit()
+
+        # Equipe 42 Team
+        p3 = db.query(Player).filter(Player.email == "alice@test.com").first()
+        p4 = db.query(Player).filter(Player.email == "bob@test.com").first()
+        
+        if p3 and p4:
+            team_b = db.query(Team).filter(Team.name == "Equipe 42").first()
+            if not team_b:
+                team_b = Team(name="Equipe 42")
+                db.add(team_b)
+                db.commit()
+                
+                p3.team_id = team_b.id
+                p4.team_id = team_b.id
+                db.commit()
+
     finally:
         db.close()
