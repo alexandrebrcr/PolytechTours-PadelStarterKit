@@ -1,0 +1,25 @@
+meta {
+  name: Delete Player
+  type: http
+  seq: 17
+}
+
+delete {
+  url: {{base_url}}/api/v1/admin/players/{{player_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("Player deleted", function() {
+    expect(res.body.message).to.include("supprimé");
+  });
+}
