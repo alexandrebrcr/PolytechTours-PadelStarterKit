@@ -1,7 +1,6 @@
 # Fichier pour lancer automatiquement tous les tests
 # Il démarre le backend et le frontend, exécute les tests Bruno, Pytest et Cypress.
 
-# Ensure we are in the directory of the script (auto_tests/)
 cd "$(dirname "$0")"
 
 # Function to cleanup processes on exit
