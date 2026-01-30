@@ -41,7 +41,6 @@ def init_db():
             )
             db.add(admin)
             db.commit()
-            # Admin created
         else:
             pass
     finally:
@@ -94,7 +93,7 @@ def init_db_test():
                 p2.team_id = team_a.id
                 db.commit()
 
-        # Equipe 42 Team
+        # Equipe 42
         p3 = db.query(Player).filter(Player.email == "alice@test.com").first()
         p4 = db.query(Player).filter(Player.email == "bob@test.com").first()
         
@@ -108,6 +107,22 @@ def init_db_test():
                 p3.team_id = team_b.id
                 p4.team_id = team_b.id
                 db.commit()
+
+        # Create inactive user for testing
+        from app.models.models import User
+        from app.core.security import get_password_hash
+        inactive_user = db.query(User).filter(User.email == "compte.desactive@example.com").first()
+        if not inactive_user:
+            inactive_user = User(
+                email="compte.desactive@example.com",
+                password_hash=get_password_hash("untest123789"),
+                role="JOUEUR",
+                is_active=False,
+                firstname="Inactive",
+                lastname="User"
+            )
+            db.add(inactive_user)
+            db.commit()
 
     finally:
         db.close()

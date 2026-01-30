@@ -23,7 +23,7 @@ fuser -k 8000/tcp 2>/dev/null
 fuser -k 5173/tcp 2>/dev/null
 
 # Start Backend
-echo "Starting Backend (TESTING mode)..."
+echo "Starting Backend..."
 cd ../backend
 export TESTING=True
 export DATABASE_URL="sqlite:///./test.db"

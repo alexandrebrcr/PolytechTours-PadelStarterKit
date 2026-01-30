@@ -1,0 +1,61 @@
+meta {
+  name: Login - Test Attempt Counter
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "test.tentatives@example.com",
+    "password": "mauvais_password"
+  }
+}
+
+tests {
+  test("Status code is 401 or 403", function() {
+    expect([401, 403]).to.include(res.status);
+  });
+  
+  if (res.status === 401) {
+    test("Attempts counter present", function() {
+      expect(res.body.detail.attempts_remaining).to.be.a('number');
+    });
+  
+    test("Message indicates wrong credentials", function() {
+      expect(res.body.detail.message).to.include("incorrect");
+    });
+  
+    console.log("Tentatives restantes:", res.body.detail.attempts_remaining);
+  }
+  
+  if (res.status === 403) {
+    test("Account is locked", function() {
+      expect(res.body.detail.message).to.include("bloqué");
+      expect(res.body.detail.locked_until).to.be.a('string');
+    });
+  
+    console.log("Compte verrouillé jusqu'à:", res.body.detail.locked_until);
+    console.log("Minutes restantes:", res.body.detail.minutes_remaining);
+  }
+}
+
+docs {
+  Test de la séquence de tentatives échouées.
+  
+  Exécuter ce test plusieurs fois de suite pour voir:
+  - Le compteur attempts_remaining diminuer (5, 4, 3, 2, 1)
+  - Le compte se verrouiller après 5 tentatives (status 403)
+  
+  Important: Utiliser une adresse email de test unique
+  pour ne pas bloquer les vrais comptes.
+}

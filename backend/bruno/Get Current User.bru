@@ -1,0 +1,27 @@
+meta {
+  name: Get Current User
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{base_url}}/api/v1/auth/me
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("Response has user data", function() {
+    expect(res.body).to.be.an('object');
+    expect(res.body.email).to.be.a('string');
+    expect(res.body.role).to.be.a('string');
+  });
+}

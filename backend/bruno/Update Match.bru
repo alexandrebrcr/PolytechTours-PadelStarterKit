@@ -1,0 +1,38 @@
+meta {
+  name: Update Match
+  type: http
+  seq: 15
+}
+
+put {
+  url: {{base_url}}/api/v1/matches/{{match_id}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {
+    "status": "TERMINE",
+    "score_team1": "6-4, 6-4",
+    "score_team2": "4-6, 4-6"
+  }
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("Match updated", function() {
+    expect(res.body.status).to.equal("TERMINE");
+    expect(res.body.score_team1).to.equal("6-4, 6-4");
+  });
+}

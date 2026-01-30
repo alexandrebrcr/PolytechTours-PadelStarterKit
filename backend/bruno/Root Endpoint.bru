@@ -1,0 +1,22 @@
+meta {
+  name: Root Endpoint
+  type: http
+  seq: 14
+}
+
+get {
+  url: {{base_url}}/
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("Response has message", function() {
+    expect(res.body.message).to.be.a('string');
+    expect(res.body.version).to.equal("1.0.0");
+  });
+}

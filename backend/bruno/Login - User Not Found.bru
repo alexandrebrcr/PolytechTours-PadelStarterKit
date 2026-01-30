@@ -1,0 +1,39 @@
+meta {
+  name: Login - User Not Found
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "utilisateur.inexistant@example.com",
+    "password": "password123"
+  }
+}
+
+tests {
+  test("Status code is 401 Unauthorized", function() {
+    expect(res.status).to.equal(401);
+  });
+  
+  test("Response has error message", function() {
+    expect(res.body).to.be.an('object');
+    expect(res.body.detail).to.be.an('object');
+    expect(res.body.detail.message).to.include("incorrect");
+  });
+  
+  test("Response has attempts_remaining", function() {
+    expect(res.body.detail.attempts_remaining).to.be.a('number');
+    expect(res.body.detail.attempts_remaining).to.be.at.most(5);
+  });
+}

@@ -1,0 +1,36 @@
+meta {
+  name: Update Player
+  type: http
+  seq: 16
+}
+
+put {
+  url: {{base_url}}/api/v1/admin/players/{{player_id}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {
+    "firstname": "Jean Updated",
+    "company": "TechCorp-Updated"
+  }
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("Player updated", function() {
+    expect(res.body.firstname).to.equal("Jean Updated");
+  });
+}

@@ -1,0 +1,43 @@
+meta {
+  name: Login - Inactive Account
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base_url}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "compte.desactive@example.com",
+    "password": "untest123789"
+  }
+}
+
+tests {
+  test("Status code is 403 Forbidden", function() {
+    expect(res.status).to.equal(403);
+  });
+  
+  test("Response indicates account is disabled", function() {
+    expect(res.body).to.be.an('object');
+    expect(res.body.detail).to.be.a('string');
+    expect(res.body.detail).to.include("désactivé");
+  });
+}
+
+docs {
+  Note: Ce test nécessite qu'un compte désactivé existe dans la base.
+  
+  Pour créer un compte désactivé:
+  1. Créer un utilisateur via l'admin
+  2. Désactiver le compte: UPDATE users SET is_active = 0 WHERE email = '...'
+  3. Utiliser ses credentials ici
+}
